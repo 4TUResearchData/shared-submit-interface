@@ -1,0 +1,11 @@
+[Unit]
+Description=Shared submit interface for DANS and 4TU.ResearchData.
+
+[Service]
+ExecStart=/usr/bin/shared-submit-interface --config-file=/etc/shared-submit-interface.xml
+Environment=LC_ALL=en_US.utf8
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="4tu, 4tu.researchdata, dans, knaw">
+    <meta name="author" content="4TU.ResearchData">
+    <meta name="author" content="DANS">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'">
+    <title>{% if page_title %}{{page_title|safe}}{% else %}{{site_name | default("Dutch Data Repository Deposit", True)}}{% endif %}</title>
+    <link rel='shortcut icon' type='image/x-icon' href='/static/images/favicon.ico'>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    {% block headers %}{% endblock %}
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="header"></div>
+      <div id="content">
+        <div id="content-wrapper">
+          <div id="message"></div>
+          {% block body %}{% endblock %}
+        </div>
+      </div>
+      <div id="footer">
+        <p>A collaboration between:</p>
+        <div class="logo-wrapper"><img decoding="async" src="/static/images/logo-dans.svg" alt="" srcset="/static/images/logo-dans.svg 1w, /static/images/logo-dans.svg 0w" sizes="(min-width: 0px) and (max-width: 0px) 0px, (min-width: 1px) 1px, 100vw" /></div><!--
+        --><div class="logo-wrapper"><img decoding="async" src="/static/images/logo-4tu.svg" alt="" srcset="/static/images/logo-4tu.svg 1w, /static/images/logo-4tu.svg 0w" sizes="(min-width: 0px) and (max-width: 0px) 0px, (min-width: 1px) 1px, 100vw" /></div>
+        <p><a href="https://github.com/4TUResearchData/shared-submit-interface">Source code</a></p>
+      </div>
+    </div>
+  </body>
+</html>

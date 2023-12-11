@@ -1,0 +1,6 @@
+include etc/shared-submit-interface.service
+include etc/shared-submit-interface.xml
+include doc/shared-submit-interface.tex doc/introduction.tex doc/ssi.sty
+include rpmbuild/SPECS/shared-submit-interface.spec
+recursive-include src *.py
+recursive-include src/shared_submit_interface/web/resources *.txt *.html *.css *.eot *.svg *.ttf *.woff *.woff2 *.js *.sparql *.jpg *.png *.ico

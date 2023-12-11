@@ -1,0 +1,28 @@
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel"
+]
+build-backend   = "setuptools.build_meta"
+
+[project]
+name            = "shared-submit-interface"
+version         = "@VERSION@"
+authors         = [{ name="Roel Janssen", email="r.r.e.janssen@tudelft.nl" }]
+description     = "Shared data submit interface software created as a collaboration between DANS and 4TU.ResearchData.The 4TU.ResearchData repository system"
+readme          = "README.md"
+requires-python = ">=3.7"
+classifiers     = [
+    "Programming Language :: Python :: 3",
+    "Environment :: Web Environment",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage"      = "https://github.com/4TUResearchData/shared-submit-interface"
+"Source Code"   = "https://github.com/4TUResearchData/shared-submit-interface"
+"Bug Tracker"   = "https://github.com/4TUResearchData/shared-submit-interface/issues"
+
+[project.scripts]
+shared-submit-interface = "shared_submit_interface.ui:main"
