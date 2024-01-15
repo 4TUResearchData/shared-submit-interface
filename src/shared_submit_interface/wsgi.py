@@ -8,6 +8,7 @@ from werkzeug.routing import Map, Rule
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 from jinja2 import Environment, FileSystemLoader
+from jinja2.exceptions import TemplateNotFound
 from shared_submit_interface import database
 
 def R (uri_path, endpoint):  # pylint: disable=invalid-name
@@ -76,13 +77,18 @@ class WebUserInterfaceServer:
         return response(environ, start_response)
 
     def __render_template (self, request, template_name, **context):
-        template      = self.jinja.get_template (template_name)
-        parameters    = {
-            "base_url": self.base_url,
-            "path":     request.path,
-        }
-        return self.response (template.render({ **context, **parameters }),
-                              mimetype='text/html')
+        try:
+            template      = self.jinja.get_template (template_name)
+            parameters    = {
+                "base_url": self.base_url,
+                "path":     request.path,
+            }
+            return self.response (template.render({ **context, **parameters }),
+                                  mimetype='text/html')
+        except TemplateNotFound:
+            self.log.error ("Jinja2 template not found.")
+
+        return self.error_500 ()
 
     ## REQUEST CHECKERS
     ## ------------------------------------------------------------------------
@@ -165,6 +171,12 @@ class WebUserInterfaceServer:
         response.status_code = 404
         return response
 
+    def error_500 (self):
+        """Procedure to respond with HTTP 500."""
+        response = self.response ("")
+        response.status_code = 500
+        return response
+
     def response (self, content, mimetype='application/json'):
         """Returns a self.response object with some tweaks."""
         return Response(content, mimetype=mimetype)
@@ -186,11 +198,11 @@ class WebUserInterfaceServer:
                          request.method,
                          request.full_path)
 
-    def ui_home (self, request):
+    def ui_home (self, request):  # pylint: disable=unused-argument
         """Implements /."""
         return self.__render_template (request, "home.html")
 
-    def robots_txt (self, request):
+    def robots_txt (self, request):  # pylint: disable=unused-argument
         """Implements /robots.txt."""
 
         output = "User-agent: *\n"
