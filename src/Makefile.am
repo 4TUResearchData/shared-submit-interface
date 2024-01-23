@@ -15,6 +15,8 @@ EXTRA_RESOURCES =                                                               
     shared_submit_interface/web/resources/html_templates/404.html                \
     shared_submit_interface/web/resources/html_templates/410.html                \
     shared_submit_interface/web/resources/html_templates/layout.html             \
+    shared_submit_interface/web/resources/html_templates/edit-dataset.html       \
+    shared_submit_interface/web/resources/html_templates/home.html               \
     shared_submit_interface/web/resources/robots.txt                             \
     shared_submit_interface/web/resources/static/fonts/FiraMono-Regular.ttf      \
     shared_submit_interface/web/resources/static/fonts/SourceSansPro-Bold.ttf    \

@@ -2,12 +2,12 @@
 @font-face { font-family: 'SourceSans-Italic'; src: url('/static/fonts/SourceSansPro-Italic.ttf') format('truetype'); font-weight: normal; font-style: italic; }
 @font-face { font-family: 'SourceSans-Bold'; src: url('/static/fonts/SourceSansPro-Bold.ttf') format('truetype'); font-weight: bold; font-style: normal; }
 @font-face { font-family: 'FiraMono'; src: url('/static/fonts/FiraMono-Regular.ttf') format('truetype'); font-weight: normal; font-style: normal; }
-body,html { width: 100%; height: 100%; padding: 0em; margin: 0em; font-family: 'SourceSans', sans-serif; font-size: 12pt; color: #000; background: #fff; }
+body,html { width: 100%; height: 100%; padding: 0em; margin: 0em; font-family: 'SourceSans', sans-serif; font-size: 12pt; color: #000; background: #ddd; }
 #wrapper { width: 100%; min-height: 100%; padding: 0em; margin: 0em auto auto auto; border: none; }
-#content { max-width: 880pt; min-height: 5em; margin: 0 auto; padding: 0; color: #000; background: #888; }
-#content-wrapper { padding: 5mm; background: #eee; }
+#content { max-width: 880pt; min-height: 5em; margin: 0 auto; padding: 0; color: #000; }
+#content-wrapper { padding: 5mm; background: #fcfcfc; border-top 0; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee; border-radius: 0em 0em .5em .5em; }
 #header img { padding: 15px 0px 25px 15px; margin: 0em; max-height: 100px; }
-#header { height: 100px; width: auto; text-align: center; color: #333; user-select: none; background: #ccc; }
+#header { height: 1em; width: auto; text-align: center; color: #333; user-select: none; max-width: 880pt; background: #fcfcfc; margin: 1em auto auto auto; padding: 0; border-radius: .5em .5em 0em 0em; border-top: solid 1px #eee; border-left: solid 1px #eee; border-right: solid 1px #eee; border-bottom: 0; }
 #footer { width: 100%; text-align: center; }
 #footer .logo-wrapper { display: inline; max-width: 300px; padding: 0px 20px 0px 20px; }
 #footer .logo-wrapper img { height: 100px; }

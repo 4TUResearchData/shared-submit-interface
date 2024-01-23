@@ -25,6 +25,7 @@ class WebUserInterfaceServer:
 
         self.url_map          = Map([
             R("/",                    self.ui_home),
+            R("/dataset-form",        self.dataset_form),
             R("/robots.txt",          self.robots_txt),
         ])
         self.allow_crawlers   = False
@@ -171,6 +172,13 @@ class WebUserInterfaceServer:
         response.status_code = 404
         return response
 
+    def error_406 (self, allowed_formats):
+        """Procedure to respond with HTTP 406."""
+        response = self.response (f"Acceptable formats: {allowed_formats}",
+                                  mimetype="text/plain")
+        response.status_code = 406
+        return response
+
     def error_500 (self):
         """Procedure to respond with HTTP 500."""
         response = self.response ("")
@@ -220,3 +228,11 @@ class WebUserInterfaceServer:
             return self.__render_template (request, "maintenance.html")
 
         return self.response (json.dumps({ "status": "maintenance" }))
+
+    def dataset_form (self, request):
+        """Implements /dataset-form."""
+
+        if request.method in ("GET", "HEAD"):
+            return self.__render_template (request, "edit-dataset.html")
+
+        return self.error_406 ("GET")
