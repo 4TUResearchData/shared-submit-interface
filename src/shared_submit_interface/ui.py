@@ -244,6 +244,7 @@ def main_inner ():
         if arguments.initialize:
             logger.info ("Initialization complete.")
             server.db.initialize_database ()
+            server.db.sparql.close()
             return None
 
         run_simple (config["address"], config["port"], server,
