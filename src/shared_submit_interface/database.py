@@ -78,6 +78,45 @@ class SparqlInterface:
 
         return template.render ({ **args, **parameters })
 
+    def __normalize_binding (self, row):
+        output = {}
+        for name in row.keys():
+            if isinstance(row[name], Literal):
+                xsd_type = row[name].datatype
+                if xsd_type == XSD.integer:
+                    output[str(name)] = int(float(row[name]))
+                elif xsd_type == XSD.decimal:
+                    output[str(name)] = int(float(row[name]))
+                elif xsd_type == XSD.boolean:
+                    try:
+                        output[str(name)] = bool(int(row[name]))
+                    except ValueError:
+                        output[str(name)] = str(row[name]).lower() == "true"
+                elif xsd_type == XSD.dateTime:
+                    time_value = row[name].partition(".")[0]
+                    if time_value[-1] == 'Z':
+                        time_value = time_value[:-1]
+                    if time_value.endswith("+00:00"):
+                        time_value = time_value[:-6]
+                    output[str(name)] = time_value
+                elif xsd_type == XSD.date:
+                    output[str(name)] = row[name]
+                elif xsd_type == XSD.string:
+                    if row[name] == "NULL":
+                        output[str(name)] = None
+                    else:
+                        output[str(name)] = str(row[name])
+                # bindings that were produced with BIND() on Virtuoso
+                # have no XSD type.
+                elif xsd_type is None:
+                    output[str(name)] = str(row[name])
+            elif row[name] is None:
+                output[str(name)] = None
+            else:
+                output[str(name)] = str(row[name])
+
+        return output
+
     def __run_query (self, query, cache_key_string=None, prefix=None, retries=5):
 
         cache_key = None
@@ -169,9 +208,69 @@ class SparqlInterface:
             return query
         return rdf.insert_query (self.state_graph, graph)
 
+    def add_triples_from_graph (self, graph):
+        """Inserts triples from GRAPH into the state graph."""
+
+        ## There's an upper limit to how many triples one can add in a single
+        ## INSERT query.  To stay on the safe side, we create batches of 250
+        ## triplets per INSERT query.
+
+        counter             = 0
+        processing_complete = True
+        insertable_graph    = Graph()
+
+        for subject, predicate, noun in graph:
+            counter += 1
+            insertable_graph.add ((subject, predicate, noun))
+            if counter >= 250:
+                query = self.__insert_query_for_graph (insertable_graph)
+                if not self.__run_query (query):
+                    processing_complete = False
+                    break
+
+                # Reset the graph by creating a new one.
+                insertable_graph = Graph()
+                counter = 0
+
+        query = self.__insert_query_for_graph (insertable_graph)
+        if not self.__run_query (query):
+            processing_complete = False
+
+        if processing_complete:
+            return True
+
+        self.log.error ("Inserting triples from a graph failed.")
+        self.__log_query (query)
+
+        return False
+
     def initialize_database (self):
         """Procedure to initialize the database."""
         graph = Graph ()
         rdf.add (graph, URIRef("this"), rdf.SSI["initialized"], True, XSD.boolean)
         query = self.__insert_query_for_graph (graph)
         return self.__run_query (query)
+
+    def datasets (self):
+        """Returns a list of datasets on success or None on failure."""
+        query = self.__query_from_template ("datasets")
+        return self.__run_query (query)
+
+    def create_dataset (self):
+        """Creates a dataset and returns a unique UUID."""
+
+        graph = Graph()
+        uri = rdf.unique_node ("dataset")
+
+        graph.add ((uri, RDF.type, rdf.SSI["Dataset"]))
+
+        current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
+        rdf.add (graph, uri, rdf.SSI["is_editable"],      True)
+        rdf.add (graph, uri, rdf.SSI["is_transfered"],    False)
+        rdf.add (graph, uri, rdf.SSI["created_date"],     current_time, XSD.dateTime)
+        rdf.add (graph, uri, rdf.SSI["modified_date"],    current_time, XSD.dateTime)
+
+        if not self.add_triples_from_graph (graph):
+            return None
+
+        return rdf.uri_to_uuid (uri)

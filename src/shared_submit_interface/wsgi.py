@@ -3,6 +3,7 @@
 import json
 import os
 import logging
+from werkzeug.utils import redirect
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
 from werkzeug.middleware.shared_data import SharedDataMiddleware
@@ -24,9 +25,11 @@ class WebUserInterfaceServer:
     def __init__ (self, address="127.0.0.1", port=8080):
 
         self.url_map          = Map([
-            R("/",                    self.ui_home),
-            R("/dataset-form",        self.dataset_form),
-            R("/robots.txt",          self.robots_txt),
+            R("/",                             self.ui_home),
+            R("/datasets",                     self.datasets),
+            R("/draft-dataset",                self.dataset_form),
+            R("/draft-dataset/<dataset_uuid>", self.dataset_form),
+            R("/robots.txt",                   self.robots_txt),
         ])
         self.allow_crawlers   = False
         self.maintenance_mode = False
@@ -229,10 +232,24 @@ class WebUserInterfaceServer:
 
         return self.response (json.dumps({ "status": "maintenance" }))
 
-    def dataset_form (self, request):
-        """Implements /dataset-form."""
+    def datasets (self, request):
+        """Implements /datasets"""
 
         if request.method in ("GET", "HEAD"):
+            datasets = self.db.datasets ()
+            self.log.info ("Datasets: %s", datasets)
+            return self.response (json.dumps(datasets))
+
+    def dataset_form (self, request, dataset_uuid=None):
+        """Implements /draft-dataset."""
+
+        if request.method in ("GET", "HEAD"):
+            if dataset_uuid is None:
+                dataset_uuid = self.db.create_dataset ()
+                if dataset_uuid is None:
+                    return self.error_500 ()
+                return redirect (f"/draft-dataset/{dataset_uuid}", code=302)
+
             return self.__render_template (request, "edit-dataset.html")
 
         return self.error_406 ("GET")
