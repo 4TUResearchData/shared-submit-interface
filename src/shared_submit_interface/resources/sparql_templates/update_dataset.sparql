@@ -1,0 +1,46 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+DELETE {
+  GRAPH <{{state_graph}}> {
+    ?dataset           ssi:title                ?title .
+    ?dataset           ssi:affiliation          ?affiliation .
+    ?dataset           ssi:description          ?description .
+    ?dataset           ssi:is_editable          ?is_editable .
+    ?dataset           ssi:is_transfered        ?is_transfered .
+    ?dataset           ssi:email                ?email .
+    ?dataset           ssi:modified_date        ?modified_date .
+  }
+}
+INSERT {
+  GRAPH <{{state_graph}}> {
+    {%- if title is not none %}
+    ?dataset           ssi:title                {{title | safe}} .
+    {%- endif%}{% if affiliation is not none %}
+    ?dataset           ssi:affiliation          {{affiliation | safe}} .
+    {%- endif%}{% if description is not none %}
+    ?dataset           ssi:description          {{description | safe}} .
+    {%- endif%}{% if is_editable is not none %}
+    ?dataset           ssi:is_editable          {{is_editable | safe}} .
+    {%- endif%}{% if is_transfered is not none %}
+    ?dataset           ssi:is_transfered        {{is_transfered | safe}} .
+    {%- endif%}{% if email is not none %}
+    ?dataset           ssi:email                {{email | safe}} .
+    {%- endif%}
+    ?dataset           ssi:modified_date        "{{modified_date | safe}}"^^xsd:string .
+  }
+}
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?dataset           rdf:type                 ssi:Dataset .
+    OPTIONAL { ?dataset ssi:title               ?title . }
+    OPTIONAL { ?dataset ssi:affiliation         ?affiliation . }
+    OPTIONAL { ?dataset ssi:description         ?description . }
+    OPTIONAL { ?dataset ssi:is_transfered       ?is_transfered . }
+    OPTIONAL { ?dataset ssi:email               ?email . }
+    ?dataset           ssi:modified_date        ?modified_date .
+    ?dataset           ssi:is_editable          ?is_editable .
+  }
+  FILTER (?dataset = <dataset:{{uuid}}>)
+  FILTER (?is_editable = "true"^^xsd:boolean)
+}
+{% endblock %}

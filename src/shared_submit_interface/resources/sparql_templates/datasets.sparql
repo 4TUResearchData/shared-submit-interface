@@ -1,15 +1,21 @@
 {% extends "prefixes.sparql" %}
 {% block query %}
-SELECT DISTINCT ?uuid ?is_editable ?is_transfered ?created_date ?modified_date
+SELECT DISTINCT ?uuid ?title ?affiliation ?email ?is_editable ?is_transfered ?created_date ?modified_date
 WHERE {
   GRAPH <{{state_graph}}> {
-    ?dataset rdf:type ssi:Dataset .
-    OPTIONAL { ?dataset ssi:is_editable ?is_editable . }
+    ?dataset            rdf:type          ssi:Dataset .
+    OPTIONAL { ?dataset ssi:title         ?title . }
+    OPTIONAL { ?dataset ssi:affiliation   ?affiliation . }
+    OPTIONAL { ?dataset ssi:email         ?email . }
+    OPTIONAL { ?dataset ssi:is_editable   ?is_editable . }
     OPTIONAL { ?dataset ssi:is_transfered ?is_transfered . }
-    OPTIONAL { ?dataset ssi:created_date ?created_date . }
+    OPTIONAL { ?dataset ssi:created_date  ?created_date . }
     OPTIONAL { ?dataset ssi:modified_date ?modified_date . }
 
     BIND (STRAFTER(STR(?dataset), "dataset:") AS ?uuid)
   }
+  {%- if uuid is not none %}
+  FILTER (?dataset = <dataset:{{uuid}}>)
+  {%- endif %}
 }
 {% endblock %}

@@ -251,9 +251,9 @@ class SparqlInterface:
         query = self.__insert_query_for_graph (graph)
         return self.__run_query (query)
 
-    def datasets (self):
+    def datasets (self, dataset_uuid=None):
         """Returns a list of datasets on success or None on failure."""
-        query = self.__query_from_template ("datasets")
+        query = self.__query_from_template ("datasets", { "uuid": dataset_uuid })
         return self.__run_query (query)
 
     def create_dataset (self):
@@ -267,10 +267,27 @@ class SparqlInterface:
         current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
         rdf.add (graph, uri, rdf.SSI["is_editable"],      True)
         rdf.add (graph, uri, rdf.SSI["is_transfered"],    False)
-        rdf.add (graph, uri, rdf.SSI["created_date"],     current_time, XSD.dateTime)
-        rdf.add (graph, uri, rdf.SSI["modified_date"],    current_time, XSD.dateTime)
+        rdf.add (graph, uri, rdf.SSI["created_date"],     current_time, XSD.string)
+        rdf.add (graph, uri, rdf.SSI["modified_date"],    current_time, XSD.string)
 
         if not self.add_triples_from_graph (graph):
             return None
 
         return rdf.uri_to_uuid (uri)
+
+    def update_dataset (self, dataset_uuid, title, affiliation, description, email, is_editable, is_transfered):
+        """Updates the metadata of a dataset."""
+
+        current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
+        query = self.__query_from_template("update_dataset", {
+            "uuid": dataset_uuid,
+            "title": rdf.escape_string_value (title),
+            "affiliation": rdf.escape_string_value (affiliation),
+            "description": rdf.escape_string_value (description),
+            "email": rdf.escape_string_value (email),
+            "is_editable": rdf.escape_boolean_value (is_editable),
+            "is_transfered": rdf.escape_boolean_value (is_transfered),
+            "modified_date": current_time
+        })
+
+        return self.__run_query (query)

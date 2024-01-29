@@ -140,6 +140,14 @@ def read_configuration_file (config, server, config_file, logger, config_files):
         config["use_reloader"]  = config_value (xml_root, "live-reload", use_reloader)
         config["use_debugger"]  = config_value (xml_root, "debug-mode", use_debugger)
 
+        enable_query_audit_log = xml_root.find ("enable-query-audit-log")
+        if enable_query_audit_log is not None:
+            config["transactions_directory"] = enable_query_audit_log.attrib.get("transactions-directory")
+            try:
+                server.db.enable_query_audit_log = bool(int(enable_query_audit_log.text))
+            except (ValueError, TypeError):
+                logger.info("Invalid value for enable-query-audit-log. Ignoring.. assuming 1 (True)")
+
         server.allow_crawlers = read_boolean_value (xml_root, "allow-crawlers",
                                                     server.allow_crawlers, logger)
 

@@ -11,6 +11,7 @@ from werkzeug.exceptions import HTTPException, NotFound, BadRequest
 from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 from shared_submit_interface import database
+from shared_submit_interface import validator
 
 def R (uri_path, endpoint):  # pylint: disable=invalid-name
     """
@@ -27,8 +28,8 @@ class WebUserInterfaceServer:
         self.url_map          = Map([
             R("/",                             self.ui_home),
             R("/datasets",                     self.datasets),
-            R("/draft-dataset",                self.dataset_form),
-            R("/draft-dataset/<dataset_uuid>", self.dataset_form),
+            R("/draft-dataset",                self.draft_dataset),
+            R("/draft-dataset/<dataset_uuid>", self.draft_dataset),
             R("/robots.txt",                   self.robots_txt),
         ])
         self.allow_crawlers   = False
@@ -90,7 +91,7 @@ class WebUserInterfaceServer:
             return self.response (template.render({ **context, **parameters }),
                                   mimetype='text/html')
         except TemplateNotFound:
-            self.log.error ("Jinja2 template not found.")
+            self.log.error ("Jinja2 template not found: '%s'.", template_name)
 
         return self.error_500 ()
 
@@ -188,6 +189,10 @@ class WebUserInterfaceServer:
         response.status_code = 500
         return response
 
+    def respond_204 (self):
+        """Procedure to respond with HTTP 204."""
+        return Response("", 204, {})
+
     def response (self, content, mimetype='application/json'):
         """Returns a self.response object with some tweaks."""
         return Response(content, mimetype=mimetype)
@@ -240,7 +245,7 @@ class WebUserInterfaceServer:
             self.log.info ("Datasets: %s", datasets)
             return self.response (json.dumps(datasets))
 
-    def dataset_form (self, request, dataset_uuid=None):
+    def draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""
 
         if request.method in ("GET", "HEAD"):
@@ -250,6 +255,37 @@ class WebUserInterfaceServer:
                     return self.error_500 ()
                 return redirect (f"/draft-dataset/{dataset_uuid}", code=302)
 
-            return self.__render_template (request, "edit-dataset.html")
+            try:
+                dataset = self.db.datasets(dataset_uuid=dataset_uuid)[0]
+                return self.__render_template (request, "edit-dataset.html", dataset=dataset)
+            except IndexError:
+                return self.error_403 (request)
 
-        return self.error_406 ("GET")
+        if request.method == "PUT":
+            if dataset_uuid is None or not validator.is_valid_uuid (dataset_uuid):
+                return self.error_403 (request)
+
+            try:
+                dataset = self.db.datasets(dataset_uuid=dataset_uuid)[0]
+            except IndexError:
+                return self.error_403 (request)
+
+            errors = []
+            record = request.get_json()
+            parameters = {
+                "dataset_uuid":  dataset_uuid,
+                "title":         validator.string_value (record, "title", 0, 255, False, error_list=errors),
+                "affiliation":   validator.string_value (record, "affiliation", 0, 128, False, error_list=errors),
+                "description":   validator.string_value (record, "description", 0, 4096, False, error_list=errors),
+                "email":         validator.string_value (record, "email", 0, 512, False, error_list=errors),
+                "is_editable":   dataset["is_editable"],
+                "is_transfered": dataset["is_transfered"]
+            }
+
+            if errors:
+                return self.error_400_list (request, errors)
+
+            if self.db.update_dataset (**parameters):
+                return self.respond_204 ()
+
+        return self.error_406 (["GET", "PUT"])

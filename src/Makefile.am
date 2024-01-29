@@ -10,23 +10,25 @@ PYTHON_FILES =                                                                  
     shared_submit_interface/wsgi.py
 
 EXTRA_RESOURCES =                                                                \
-    shared_submit_interface/web/resources/html_templates/400.html                \
-    shared_submit_interface/web/resources/html_templates/403.html                \
-    shared_submit_interface/web/resources/html_templates/404.html                \
-    shared_submit_interface/web/resources/html_templates/410.html                \
-    shared_submit_interface/web/resources/html_templates/edit-dataset.html       \
-    shared_submit_interface/web/resources/html_templates/home.html               \
-    shared_submit_interface/web/resources/html_templates/layout.html             \
-    shared_submit_interface/web/resources/robots.txt                             \
-    shared_submit_interface/web/resources/sparql_templates/prefixes.sparql       \
-    shared_submit_interface/web/resources/sparql_templates/datasets.sparql       \
-    shared_submit_interface/web/resources/static/fonts/FiraMono-Regular.ttf      \
-    shared_submit_interface/web/resources/static/fonts/SourceSansPro-Bold.ttf    \
-    shared_submit_interface/web/resources/static/fonts/SourceSansPro-Italic.ttf  \
-    shared_submit_interface/web/resources/static/fonts/SourceSansPro-Regular.ttf \
-    shared_submit_interface/web/resources/static/images/loader.svg               \
-    shared_submit_interface/web/resources/static/images/logo-4tu.svg             \
-    shared_submit_interface/web/resources/static/images/logo-dans.svg            \
-    shared_submit_interface/web/resources/static/js/jquery-3.7.1.min.js
+    shared_submit_interface/resources/html_templates/400.html                    \
+    shared_submit_interface/resources/html_templates/403.html                    \
+    shared_submit_interface/resources/html_templates/404.html                    \
+    shared_submit_interface/resources/html_templates/410.html                    \
+    shared_submit_interface/resources/html_templates/edit-dataset.html           \
+    shared_submit_interface/resources/html_templates/home.html                   \
+    shared_submit_interface/resources/html_templates/layout.html                 \
+    shared_submit_interface/resources/robots.txt                                 \
+    shared_submit_interface/resources/sparql_templates/datasets.sparql           \
+    shared_submit_interface/resources/sparql_templates/prefixes.sparql           \
+    shared_submit_interface/resources/sparql_templates/update_dataset.sparql     \
+    shared_submit_interface/resources/static/fonts/FiraMono-Regular.ttf          \
+    shared_submit_interface/resources/static/fonts/SourceSansPro-Bold.ttf        \
+    shared_submit_interface/resources/static/fonts/SourceSansPro-Italic.ttf      \
+    shared_submit_interface/resources/static/fonts/SourceSansPro-Regular.ttf     \
+    shared_submit_interface/resources/static/images/loader.svg                   \
+    shared_submit_interface/resources/static/images/logo-4tu.svg                 \
+    shared_submit_interface/resources/static/images/logo-dans.svg                \
+    shared_submit_interface/resources/static/js/edit-dataset.js                  \
+    shared_submit_interface/resources/static/js/jquery-3.7.1.min.js
 
 EXTRA_DIST = $(PYTHON_FILES) $(EXTRA_RESOURCES)
