@@ -3,10 +3,11 @@ AUTOMAKE_OPTIONS        = subdir-objects
 PYTHON_FILES =                                                                   \
     shared_submit_interface/__init__.py                                          \
     shared_submit_interface/ui.py                                                \
-    shared_submit_interface/convenience.py                                       \
-    shared_submit_interface/rdf.py                                               \
     shared_submit_interface/cache.py                                             \
+    shared_submit_interface/convenience.py                                       \
     shared_submit_interface/database.py                                          \
+    shared_submit_interface/formatter.py                                         \
+    shared_submit_interface/rdf.py                                               \
     shared_submit_interface/wsgi.py
 
 EXTRA_RESOURCES =                                                                \

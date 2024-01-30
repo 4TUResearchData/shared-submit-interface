@@ -26,7 +26,7 @@ INSERT {
     {%- endif%}{% if email is not none %}
     ?dataset           ssi:email                {{email | safe}} .
     {%- endif%}
-    ?dataset           ssi:modified_date        "{{modified_date | safe}}"^^xsd:string .
+    ?dataset           ssi:modified_date        "{{modified_date}}"^^xsd:integer .
   }
 }
 WHERE {

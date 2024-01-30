@@ -12,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 from jinja2.exceptions import TemplateNotFound
 from shared_submit_interface import database
 from shared_submit_interface import validator
+from shared_submit_interface import formatter
 
 def R (uri_path, endpoint):  # pylint: disable=invalid-name
     """
@@ -189,6 +190,17 @@ class WebUserInterfaceServer:
         response.status_code = 500
         return response
 
+    def default_list_response (self, records, format_function, **parameters):
+        """Procedure to respond a list of items."""
+        output     = []
+        try:
+            for record in records:
+                output.append(format_function ({ **parameters, **record}))
+        except TypeError:
+            self.log.error ("%s: A TypeError occurred.", format_function)
+
+        return self.response (json.dumps(output))
+
     def respond_204 (self):
         """Procedure to respond with HTTP 204."""
         return Response("", 204, {})
@@ -242,8 +254,9 @@ class WebUserInterfaceServer:
 
         if request.method in ("GET", "HEAD"):
             datasets = self.db.datasets ()
-            self.log.info ("Datasets: %s", datasets)
-            return self.response (json.dumps(datasets))
+            return self.default_list_response (datasets, formatter.dataset_record)
+
+        return self.error_406 ("GET")
 
     def draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""

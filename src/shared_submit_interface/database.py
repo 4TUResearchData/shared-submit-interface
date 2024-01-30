@@ -6,7 +6,7 @@ from datetime import datetime
 from urllib.error import URLError, HTTPError
 from rdflib import Dataset, Graph, Literal, RDF, XSD, URIRef
 from rdflib.plugins.stores import sparqlstore
-from rdflib.store import VALID_STORE, CORRUPTED_STORE, NO_STORE
+from rdflib.store import CORRUPTED_STORE, NO_STORE
 from jinja2 import Environment, FileSystemLoader
 from shared_submit_interface import cache, rdf
 
@@ -93,6 +93,7 @@ class SparqlInterface:
                     except ValueError:
                         output[str(name)] = str(row[name]).lower() == "true"
                 elif xsd_type == XSD.dateTime:
+                    self.log.warning ("Using xsd:dateTime is deprecated.")
                     time_value = row[name].partition(".")[0]
                     if time_value[-1] == 'Z':
                         time_value = time_value[:-1]
@@ -263,12 +264,11 @@ class SparqlInterface:
         uri = rdf.unique_node ("dataset")
 
         graph.add ((uri, RDF.type, rdf.SSI["Dataset"]))
-
-        current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
+        current_epoch = int(datetime.now().timestamp())
         rdf.add (graph, uri, rdf.SSI["is_editable"],      True)
         rdf.add (graph, uri, rdf.SSI["is_transfered"],    False)
-        rdf.add (graph, uri, rdf.SSI["created_date"],     current_time, XSD.string)
-        rdf.add (graph, uri, rdf.SSI["modified_date"],    current_time, XSD.string)
+        rdf.add (graph, uri, rdf.SSI["created_date"],     current_epoch, XSD.integer)
+        rdf.add (graph, uri, rdf.SSI["modified_date"],    current_epoch, XSD.integer)
 
         if not self.add_triples_from_graph (graph):
             return None
@@ -278,7 +278,7 @@ class SparqlInterface:
     def update_dataset (self, dataset_uuid, title, affiliation, description, email, is_editable, is_transfered):
         """Updates the metadata of a dataset."""
 
-        current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
+        current_epoch = int(datetime.now().timestamp())
         query = self.__query_from_template("update_dataset", {
             "uuid": dataset_uuid,
             "title": rdf.escape_string_value (title),
@@ -287,7 +287,7 @@ class SparqlInterface:
             "email": rdf.escape_string_value (email),
             "is_editable": rdf.escape_boolean_value (is_editable),
             "is_transfered": rdf.escape_boolean_value (is_transfered),
-            "modified_date": current_time
+            "modified_date": current_epoch
         })
 
         return self.__run_query (query)
