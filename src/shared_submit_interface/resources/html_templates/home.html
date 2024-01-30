@@ -1,7 +1,10 @@
 {% extends "layout.html" %}
 {% block headers %}
+<link href="/static/css/form.css" rel="stylesheet">
 {% endblock %}
 {% block body %}
 <h1>Home</h1>
-<a href="/draft-dataset">Publish dataset</a>
+<ul class="action-buttons">
+  <li class="start-button"><a href="/draft-dataset">Find repository</a>
+</ul>
 {% endblock %}
