@@ -142,8 +142,6 @@
 }
 .multi-list { display: none; border: none; }
 .multi-list thead { display: none; }
-.list-resource ul { margin: 0em; padding: 0em; }
-.list-resource li { list-style-type: none; margin: 0em; padding: .5em; }
 .form-button {
     margin: 0px;
     display: inline-block;
@@ -153,24 +151,27 @@
     font-size: 14pt;
     user-select: none;
 }
-.input-with-button {
-    display:flex;
-    flex-direction:row;
-    padding: 0px;
+ul.action-buttons { margin: 0px; padding: 0px;  }
+ul.action-buttons li {
+    display: inline-block;
+    list-style-type: none;
+    user-select: none;
+    margin: 0em 1em 0em 0em;
+    padding: 0;
 }
-.input-with-button input[type="text"] {
-    border: none;
-    margin-bottom: 0px;
-    border-radius: 0em 0em 0em .5em  !important;
-}
-.input-with-button a {
-    white-space: nowrap;
-    background: #666666;
-    color: #fff;
+ul.action-buttons li a {
+    display: inline-block;
+    padding: .5em .75em .5em .75em;
     border-radius: .5em;
-    margin: 0em 0em 0em 0em;
-    vertical-align: middle;
-    height: 1.5em;
-    border-radius: 0em .5em .5em 0em !important;
+    text-decoration: none;
 }
-.input-with-button a:hover { background: #999999; }
+li.save-button a { background: #139257; color: #ffffff; }
+li.save-button a:hover { background: #18b76d; }
+li.save-button a:active { background: #107a48; }
+li.transfer-button a { background: #925713; color: #ffffff; }
+li.transfer-button a:hover { background: #b76d18; }
+li.transfer-button a:active { background: #7a4810; }
+li.start-button a { background: #135792; color: #ffffff; }
+li.start-button a:hover { background: #186db7; }
+li.start-button a:active { background: #10487a; }
+div.options-wrapper select { width: 832pt !important; }

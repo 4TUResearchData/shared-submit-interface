@@ -1,28 +1,6 @@
 {% extends "layout.html" %}
 {% block headers %}
 <link href="/static/css/form.css" rel="stylesheet">
-<style>
-ul.action-buttons { margin: 0px; padding: 0px;  }
-ul.action-buttons li {
-    display: inline-block;
-    list-style-type: none;
-    user-select: none;
-    margin: 0em 1em 0em 0em;
-    padding: 0;
-}
-ul.action-buttons li a {
-    display: inline-block;
-    padding: .5em .75em .5em .75em;
-    border-radius: .5em;
-    text-decoration: none;
-}
-li.save-button a { background: #139257; color: #ffffff; }
-li.save-button a:hover { background: #18b76d; }
-li.save-button a:active { background: #107a48; }
-li.transfer-button a { background: #925713; color: #ffffff; }
-li.transfer-button a:hover { background: #b76d18; }
-li.transfer-button a:active { background: #7a4810; }
-</style>
 <script src="/static/js/jquery-3.7.1.min.js"></script>
 <script src="/static/js/edit-dataset.js"></script>
 <script>
