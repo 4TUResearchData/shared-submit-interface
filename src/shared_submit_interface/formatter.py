@@ -21,3 +21,11 @@ def dataset_record (record):
         "created_date":  to_timestamp (value_or_none (record, "created_date")),
         "modified_date": to_timestamp (value_or_none (record, "modified_date"))
     }
+
+def organization_record (record):
+    """Formats a organization record."""
+    return {
+        "uuid":          value_or_none (record, "uuid"),
+        "name":          value_or_none (record, "name"),
+        "url":           value_or_none (record, "url"),
+    }

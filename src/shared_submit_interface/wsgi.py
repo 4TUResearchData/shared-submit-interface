@@ -28,6 +28,7 @@ class WebUserInterfaceServer:
 
         self.url_map          = Map([
             R("/",                             self.ui_home),
+            R("/organizations",                self.organizations),
             R("/datasets",                     self.datasets),
             R("/draft-dataset",                self.draft_dataset),
             R("/draft-dataset/<dataset_uuid>", self.draft_dataset),
@@ -248,6 +249,28 @@ class WebUserInterfaceServer:
             return self.__render_template (request, "maintenance.html")
 
         return self.response (json.dumps({ "status": "maintenance" }))
+
+    def organizations (self, request):
+        """Implements /organizations"""
+
+        if request.method in ("GET", "HEAD"):
+            organizations = self.db.organizations ()
+            return self.default_list_response (organizations, formatter.organization_record)
+
+        if request.method == "POST":
+            errors = []
+            record = request.get_json()
+            parameters = {
+                "search_for": validator.string_value (record, "search_for", 0, 255, False, error_list=errors)
+            }
+
+            if errors:
+                return self.error_400_list (request, errors)
+
+            organizations = self.db.organizations (**parameters)
+            return self.default_list_response (organizations, formatter.organization_record)
+
+        return self.error_406 ("GET")
 
     def datasets (self, request):
         """Implements /datasets"""

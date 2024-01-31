@@ -292,8 +292,23 @@ class SparqlInterface:
             return True
 
         graph = Graph ()
+        organizations = self.read_organizations_from_surf_idps_metadata ()
+        for organization in organizations:
+            uri = URIRef(rdf.uuid_to_uri (organization["uuid"], "organization"))
+            rdf.add (graph, uri, RDF.type, rdf.SSI["Organization"], "uri")
+            rdf.add (graph, uri, rdf.SSI["name"], organization["name"], XSD.string)
+            rdf.add (graph, uri, rdf.SSI["url"], organization["url"], "uri")
+
         rdf.add (graph, URIRef("this"), rdf.SSI["initialized"], True, XSD.boolean)
         query = self.__insert_query_for_graph (graph)
+        return self.__run_query (query)
+
+    def organizations (self, organization_uuid=None, search_for=None):
+        """Returns a list of organizations on success or None on failure."""
+        query = self.__query_from_template ("organizations", {
+            "uuid": organization_uuid,
+            "search_for": search_for
+        })
         return self.__run_query (query)
 
     def datasets (self, dataset_uuid=None):
