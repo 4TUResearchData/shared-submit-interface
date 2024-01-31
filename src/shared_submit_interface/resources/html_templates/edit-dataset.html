@@ -21,6 +21,16 @@
 <label for="affiliation">E-mail address</label>
 <input type="text" id="email" name="email" value="{{dataset.email}}" />
 
+<label for="type-of-data">Type of data</label>
+<div class="options-wrapper">
+  <select id="type-of-data">
+    <option value="" disabled selected>Select which type of data</option>
+    <option value="vcs-software">Software under version control with Git</option>
+    <option value="netcdf">netCDF for use with OPeNDAP</option>
+    <option value="other">Other</option>
+  </select>
+</div>
+
 <ul class="action-buttons">
   <li class="save-button"><a id="save" href="#">Save draft</a>
   <li class="transfer-button"><a id="transfer" href="#">Transfer to repository</a>
