@@ -2,6 +2,9 @@
 
 import os
 import logging
+import uuid
+from urllib.request import urlopen
+from defusedxml import ElementTree
 from datetime import datetime
 from urllib.error import URLError, HTTPError
 from rdflib import Dataset, Graph, Literal, RDF, XSD, URIRef
@@ -244,6 +247,40 @@ class SparqlInterface:
         self.__log_query (query)
 
         return False
+
+    def read_organizations_from_surf_idps_metadata (self):
+        """Returns a list of organizations by querying SURFContext's identity provider metadata."""
+
+        organizations = []
+        with urlopen("https://metadata.surfconext.nl/idps-metadata.xml") as handler:
+            tree = ElementTree.parse(handler)
+            xml_root = tree.getroot()
+
+            try:
+                schema_ns = xml_root.attrib.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation").split(" ")[0]
+                xml_ns = "http://www.w3.org/XML/1998/namespace"
+            except (AttributeError, IndexError):
+                self.log.error ("Incompatible schema for SURF IDP metadata..")
+
+            if xml_root.tag != f"{{{schema_ns}}}EntitiesDescriptor":
+                self.log.error ("The SURF IDP metadata format seems to have changed.")
+                return organizations
+
+            organization_elements = xml_root.findall(f"{{{schema_ns}}}EntityDescriptor/{{{schema_ns}}}Organization")
+            number_of_organizations = 0
+            for element in organization_elements:
+                try:
+                    name = element.find (f"{{{schema_ns}}}OrganizationDisplayName[@{{{xml_ns}}}lang='en']").text
+                    url = element.find (f"{{{schema_ns}}}OrganizationURL").text
+                    identifier = uuid.uuid3 (uuid.NAMESPACE_URL, url.encode("utf-8"))
+                    organizations.append({ "uuid": identifier, "name": name, "url": url })
+                    number_of_organizations += 1
+                except AttributeError:
+                    self.log.warning ("Skipping organization due to missing metadata.")
+
+            self.log.info ("Found %d organizations.", number_of_organizations)
+
+        return organizations
 
     def initialize_database (self):
         """Procedure to initialize the database."""
