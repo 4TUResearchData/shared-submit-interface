@@ -284,6 +284,13 @@ class SparqlInterface:
 
     def initialize_database (self):
         """Procedure to initialize the database."""
+
+        # Do not re-initialize.
+        is_initialized = self.__run_query (self.__query_from_template ("is_initialized"))
+        if is_initialized:
+            self.log.info ("Skipping re-initialization of the state-graph.")
+            return True
+
         graph = Graph ()
         rdf.add (graph, URIRef("this"), rdf.SSI["initialized"], True, XSD.boolean)
         query = self.__insert_query_for_graph (graph)
