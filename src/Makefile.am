@@ -22,6 +22,7 @@ EXTRA_RESOURCES =                                                               
     shared_submit_interface/resources/sparql_templates/datasets.sparql           \
     shared_submit_interface/resources/sparql_templates/is_initialized.sparql     \
     shared_submit_interface/resources/sparql_templates/prefixes.sparql           \
+    shared_submit_interface/resources/sparql_templates/organizations.sparql      \
     shared_submit_interface/resources/sparql_templates/update_dataset.sparql     \
     shared_submit_interface/resources/static/fonts/FiraMono-Regular.ttf          \
     shared_submit_interface/resources/static/fonts/SourceSansPro-Bold.ttf        \

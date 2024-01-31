@@ -1,0 +1,19 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT DISTINCT ?uuid ?name ?url
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?organization            rdf:type          ssi:Organization .
+    OPTIONAL { ?organization ssi:name         ?name . }
+    OPTIONAL { ?organization ssi:url          ?url . }
+
+    BIND (STRAFTER(STR(?organization), "organization:") AS ?uuid)
+  }
+  {%- if uuid is not none %}
+  FILTER (?organization = <organization:{{uuid}}>)
+  {%- endif %}
+  {%- if search_for is not none %}
+  FILTER (CONTAINS(LCASE(?name), LCASE("{{search_for}}"^^xsd:string)))
+  {%- endif %}
+}
+{% endblock %}
