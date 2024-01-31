@@ -311,7 +311,7 @@ class WebUserInterfaceServer:
             parameters = {
                 "dataset_uuid":  dataset_uuid,
                 "title":         validator.string_value (record, "title", 0, 255, False, error_list=errors),
-                "affiliation":   validator.string_value (record, "affiliation", 0, 128, False, error_list=errors),
+                "affiliation":   validator.uuid_value (record, "affiliation", False, error_list=errors),
                 "description":   validator.string_value (record, "description", 0, 4096, False, error_list=errors),
                 "email":         validator.string_value (record, "email", 0, 512, False, error_list=errors),
                 "is_editable":   dataset["is_editable"],

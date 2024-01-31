@@ -341,7 +341,7 @@ class SparqlInterface:
         query = self.__query_from_template("update_dataset", {
             "uuid": dataset_uuid,
             "title": rdf.escape_string_value (title),
-            "affiliation": rdf.escape_string_value (affiliation),
+            "affiliation": rdf.uuid_to_uri (affiliation, "organization"),
             "description": rdf.escape_string_value (description),
             "email": rdf.escape_string_value (email),
             "is_editable": rdf.escape_boolean_value (is_editable),

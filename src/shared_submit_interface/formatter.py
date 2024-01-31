@@ -15,7 +15,10 @@ def dataset_record (record):
         "uuid":          value_or_none (record, "uuid"),
         "title":         value_or_none (record, "title"),
         "email":         value_or_none (record, "email"),
-        "affiliation":   value_or_none (record, "affiliation"),
+        "affiliation": {
+            "uuid": value_or_none (record, "affiliation_uuid"),
+            "name": value_or_none (record, "affiliation_name")
+        },
         "is_editable":   value_or_none (record, "is_editable"),
         "is_transfered": value_or_none (record, "is_transfered"),
         "created_date":  to_timestamp (value_or_none (record, "created_date")),

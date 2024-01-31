@@ -16,7 +16,7 @@ INSERT {
     {%- if title is not none %}
     ?dataset           ssi:title                {{title | safe}} .
     {%- endif%}{% if affiliation is not none %}
-    ?dataset           ssi:affiliation          {{affiliation | safe}} .
+    ?dataset           ssi:affiliation          <{{affiliation}}> .
     {%- endif%}{% if description is not none %}
     ?dataset           ssi:description          {{description | safe}} .
     {%- endif%}{% if is_editable is not none %}
