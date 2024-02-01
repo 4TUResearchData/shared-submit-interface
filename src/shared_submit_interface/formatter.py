@@ -32,3 +32,10 @@ def organization_record (record):
         "name":          value_or_none (record, "name"),
         "url":           value_or_none (record, "url"),
     }
+
+def repository_record (record):
+    """Formats a repository record."""
+    return {
+        "name": value_or_none (record, "name"),
+        "endpoint": value_or_none (record, "endpoint")
+    }

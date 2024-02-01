@@ -107,6 +107,31 @@ def configure_file_logging (log_file, inside_reload, logger):
             log.removeHandler(handler)
         log.addHandler(file_handler)
 
+def read_pre_shared_keys_for_repositories (server, xml_root, logger):
+    """Procedure to read integration keys for DANS and 4TU."""
+
+    repositories = xml_root.find("repositories")
+    if not repositories:
+        return None
+
+    for repository in repositories:
+        name = repository.attrib.get("name")
+        api_url = repository.attrib.get("endpoint")
+        pre_shared_key = repository.text
+        register_repository = True
+        if name is None or name == "":
+            logger.error("The 'name' attribute is required for repository '%s'.", name)
+            register_repository = False
+        if api_url is None or api_url == "":
+            logger.error("The 'endpoint' attribute is required for repository '%s'.", name)
+            register_repository = False
+        if pre_shared_key is None or pre_shared_key == "":
+            logger.error("A pre-shared key is needed for repository '%s'.", name)
+            register_repository = False
+        if register_repository:
+            pre_shared_key = pre_shared_key.strip(" \t\n\r").replace(" ", "").replace("\n", "").replace("\r", "").replace("\t", "")
+            server.repositories[name] = { "psk": pre_shared_key, "endpoint": api_url }
+
 def read_configuration_file (config, server, config_file, logger, config_files):
     """Procedure to parse a configuration file."""
 
@@ -161,6 +186,8 @@ def read_configuration_file (config, server, config_file, logger, config_files):
         update_endpoint = config_value (xml_root, "rdf-store/sparql-update-uri")
         if update_endpoint:
             server.db.update_endpoint = update_endpoint
+
+        read_pre_shared_keys_for_repositories (server, xml_root, logger)
 
         for include_element in xml_root.iter('include'):
             include = include_element.text

@@ -33,11 +33,13 @@ class WebUserInterfaceServer:
             R("/draft-dataset",                self.draft_dataset),
             R("/draft-dataset/<dataset_uuid>", self.draft_dataset),
             R("/robots.txt",                   self.robots_txt),
+            R("/repositories",                    self.repositories),
         ])
         self.allow_crawlers   = False
         self.maintenance_mode = False
         self.base_url         = f"http://{address}:{port}"
         self.db               = database.SparqlInterface()  # pylint: disable=invalid-name
+        self.repositories     = {}
         resources_path        = os.path.dirname(__file__)
         self.jinja            = Environment(loader = FileSystemLoader([
             os.path.join(resources_path, "resources", "html_templates"),
@@ -272,6 +274,12 @@ class WebUserInterfaceServer:
 
         return self.error_406 ("GET")
 
+    def repositories (self, request):
+        """Implements /repositories."""
+
+        if request.method in ("GET", "HEAD"):
+            repositories = list(map(lambda name: { "name": name, **self.repositories[name] }, self.repositories.keys()))
+            return self.default_list_response (repositories, formatter.repository_record)
     def datasets (self, request):
         """Implements /datasets"""
 
