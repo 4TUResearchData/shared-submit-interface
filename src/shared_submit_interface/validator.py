@@ -243,6 +243,9 @@ def uuid_value (record, field_name, required=False, error_list=None):
     """Validation procedure for UUID values."""
 
     value = string_value (record, field_name, 36, 36, required=required, error_list=error_list)
+    if value is None and not required:
+        return value
+
     if not is_valid_uuid (value):
         return raise_or_return_error (error_list,
                     InvalidValue(
