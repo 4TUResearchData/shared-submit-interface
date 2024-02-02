@@ -132,6 +132,8 @@ def read_pre_shared_keys_for_repositories (server, xml_root, logger):
             pre_shared_key = pre_shared_key.strip(" \t\n\r").replace(" ", "").replace("\n", "").replace("\r", "").replace("\t", "")
             server.repositories[name] = { "psk": pre_shared_key, "endpoint": api_url }
 
+    return None
+
 def read_configuration_file (config, server, config_file, logger, config_files):
     """Procedure to parse a configuration file."""
 

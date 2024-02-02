@@ -3,10 +3,10 @@
 import os
 import logging
 import uuid
-from urllib.request import urlopen
-from defusedxml import ElementTree
 from datetime import datetime
 from urllib.error import URLError, HTTPError
+from urllib.request import urlopen
+from defusedxml import ElementTree
 from rdflib import Dataset, Graph, Literal, RDF, XSD, URIRef
 from rdflib.plugins.stores import sparqlstore
 from rdflib.store import CORRUPTED_STORE, NO_STORE
