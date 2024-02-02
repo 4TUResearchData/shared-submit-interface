@@ -29,7 +29,7 @@ function save_dataset (event, dataset_uuid, notify=true, on_success=jQuery.noop)
 
     form_data = gather_form_data();
     jQuery.ajax({
-        url:         `/draft-dataset/${dataset_uuid}`,
+        url:         `/api/v1/dataset/${dataset_uuid}`,
         type:        "PUT",
         contentType: "application/json",
         accept:      "application/json",
@@ -69,7 +69,7 @@ function autocomplete_organization (event, dataset_uuid) {
         jQuery("#affiliation-uuid").val("");
     } else if (current_text.length > 2) {
         jQuery.ajax({
-            url:         `/organizations`,
+            url:         `/api/v1/organizations`,
             type:        "POST",
             contentType: "application/json",
             accept:      "application/json",

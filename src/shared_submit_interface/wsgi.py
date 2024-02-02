@@ -27,13 +27,14 @@ class WebUserInterfaceServer:
     def __init__ (self, address="127.0.0.1", port=8080):
 
         self.url_map          = Map([
-            R("/",                             self.ui_home),
-            R("/organizations",                self.organizations),
-            R("/datasets",                     self.datasets),
-            R("/draft-dataset",                self.draft_dataset),
-            R("/draft-dataset/<dataset_uuid>", self.draft_dataset),
-            R("/robots.txt",                   self.robots_txt),
-            R("/repositories",                    self.repositories),
+            R("/",                                self.ui_home),
+            R("/api/v1/organizations",            self.api_v1_organizations),
+            R("/api/v1/repositories",             self.api_v1_repositories),
+            R("/api/v1/datasets",                 self.api_v1_datasets),
+            R("/api/v1/dataset/<dataset_uuid>",   self.api_v1_dataset),
+            R("/draft-dataset",                   self.draft_dataset),
+            R("/draft-dataset/<dataset_uuid>",    self.draft_dataset),
+            R("/robots.txt",                      self.robots_txt),
         ])
         self.allow_crawlers   = False
         self.maintenance_mode = False
@@ -180,6 +181,13 @@ class WebUserInterfaceServer:
         response.status_code = 404
         return response
 
+    def error_405 (self, allowed_methods):
+        """Procedure to respond with HTTP 405."""
+        response = self.response (f"Acceptable methods: {allowed_methods}",
+                                  mimetype="text/plain")
+        response.status_code = 405
+        return response
+
     def error_406 (self, allowed_formats):
         """Procedure to respond with HTTP 406."""
         response = self.response (f"Acceptable formats: {allowed_formats}",
@@ -252,8 +260,8 @@ class WebUserInterfaceServer:
 
         return self.response (json.dumps({ "status": "maintenance" }))
 
-    def organizations (self, request):
-        """Implements /organizations"""
+    def api_v1_organizations (self, request):
+        """Implements /api/v1/organizations."""
 
         if request.method in ("GET", "HEAD"):
             organizations = self.db.organizations ()
@@ -272,22 +280,59 @@ class WebUserInterfaceServer:
             organizations = self.db.organizations (**parameters)
             return self.default_list_response (organizations, formatter.organization_record)
 
-        return self.error_406 ("GET")
+        return self.error_405 ("GET")
 
-    def repositories (self, request):
-        """Implements /repositories."""
+    def api_v1_repositories (self, request):
+        """Implements /api/v1/repositories."""
 
         if request.method in ("GET", "HEAD"):
             repositories = list(map(lambda name: { "name": name, **self.repositories[name] }, self.repositories.keys()))
             return self.default_list_response (repositories, formatter.repository_record)
-    def datasets (self, request):
-        """Implements /datasets"""
+
+        return self.error_405 ("GET")
+
+    def api_v1_datasets (self, request):
+        """Implements /api/v1/datasets"""
 
         if request.method in ("GET", "HEAD"):
             datasets = self.db.datasets ()
             return self.default_list_response (datasets, formatter.dataset_record)
 
-        return self.error_406 ("GET")
+        return self.error_405 ("GET")
+
+    def api_v1_dataset (self, request, dataset_uuid):
+        """Implements /api/v1/dataset/<dataset_uuid>."""
+
+        if request.method != "PUT":
+            return self.error_405 ("PUT")
+
+        if not validator.is_valid_uuid (dataset_uuid):
+            return self.error_403 (request)
+
+        try:
+            dataset = self.db.datasets (dataset_uuid=dataset_uuid)[0]
+        except IndexError:
+            return self.error_404 (request)
+
+        errors = []
+        record = request.get_json()
+        parameters = {
+            "dataset_uuid":  dataset_uuid,
+            "title":         validator.string_value (record, "title", 0, 255, False, error_list=errors),
+            "affiliation":   validator.uuid_value (record, "affiliation", False, error_list=errors),
+            "description":   validator.string_value (record, "description", 0, 4096, False, error_list=errors),
+            "email":         validator.string_value (record, "email", 0, 512, False, error_list=errors),
+            "is_editable":   dataset["is_editable"],
+            "is_transfered": dataset["is_transfered"]
+        }
+
+        if errors:
+            return self.error_400_list (request, errors)
+
+        if not self.db.update_dataset (**parameters):
+            return self.error_500 ()
+
+        return self.respond_204 ()
 
     def draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""
@@ -305,31 +350,7 @@ class WebUserInterfaceServer:
             except IndexError:
                 return self.error_403 (request)
 
-        if request.method == "PUT":
-            if dataset_uuid is None or not validator.is_valid_uuid (dataset_uuid):
-                return self.error_403 (request)
+        return self.error_405 ("GET")
 
-            try:
-                dataset = self.db.datasets(dataset_uuid=dataset_uuid)[0]
-            except IndexError:
-                return self.error_403 (request)
 
-            errors = []
-            record = request.get_json()
-            parameters = {
-                "dataset_uuid":  dataset_uuid,
-                "title":         validator.string_value (record, "title", 0, 255, False, error_list=errors),
-                "affiliation":   validator.uuid_value (record, "affiliation", False, error_list=errors),
-                "description":   validator.string_value (record, "description", 0, 4096, False, error_list=errors),
-                "email":         validator.string_value (record, "email", 0, 512, False, error_list=errors),
-                "is_editable":   dataset["is_editable"],
-                "is_transfered": dataset["is_transfered"]
-            }
 
-            if errors:
-                return self.error_400_list (request, errors)
-
-            if self.db.update_dataset (**parameters):
-                return self.respond_204 ()
-
-        return self.error_406 (["GET", "PUT"])
