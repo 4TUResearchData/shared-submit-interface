@@ -13,6 +13,7 @@ from rdflib.store import CORRUPTED_STORE, NO_STORE
 from jinja2 import Environment, FileSystemLoader
 from shared_submit_interface import cache, rdf
 
+
 class SparqlInterface:
     """This class reads and writes data from a SPARQL endpoint."""
 
@@ -23,10 +24,12 @@ class SparqlInterface:
         self.state_graph  = "ssi://default"
         self.log          = logging.getLogger(__name__)
         self.cache        = cache.CacheLayer(None)
-        self.jinja        = Environment(loader = FileSystemLoader(
-                            os.path.join(os.path.dirname(__file__),
-                                         "resources/sparql_templates")),
-                                        autoescape=True)
+
+        sparql_templates_path = os.path.join(os.path.dirname(__file__),
+                                             "resources",
+                                             "sparql_templates")
+        self.jinja        = Environment(loader = FileSystemLoader(sparql_templates_path),
+                                        autoescape = True)
         self.sparql       = None
         self.sparql_is_up = False
         self.enable_query_audit_log = False
@@ -135,13 +138,13 @@ class SparqlInterface:
             execution_type, query_type = rdf.query_type (query)
             if execution_type == "update":
                 self.sparql.update (query)
-                ## Upon failure, an exception is thrown.
+                # Upon failure, an exception is thrown.
                 if self.enable_query_audit_log:
                     self.__log_query (query, "Query Audit Log")
                 results = True
             elif execution_type == "gather":
                 query_results = self.sparql.query(query)
-                ## ASK queries only return a boolean.
+                # ASK queries only return a boolean.
                 if query_type == "ASK":
                     results = query_results.askAnswer
                 elif isinstance(query_results, tuple):
@@ -181,7 +184,7 @@ class SparqlInterface:
                     self.log.warning ("Retrying SPARQL request due to service unavailability (%s)",
                                       retries)
                     return self.__run_query (query, cache_key_string=cache_key_string,
-                                             prefix=prefix, retries=retries-1)
+                                             prefix=prefix, retries=(retries - 1))
 
                 self.log.warning ("Giving up on retrying SPARQL request.")
 
@@ -215,9 +218,9 @@ class SparqlInterface:
     def add_triples_from_graph (self, graph):
         """Inserts triples from GRAPH into the state graph."""
 
-        ## There's an upper limit to how many triples one can add in a single
-        ## INSERT query.  To stay on the safe side, we create batches of 250
-        ## triplets per INSERT query.
+        # There's an upper limit to how many triples one can add in a single
+        # INSERT query.  To stay on the safe side, we create batches of 250
+        # triplets per INSERT query.
 
         counter             = 0
         processing_complete = True

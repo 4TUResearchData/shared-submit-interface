@@ -14,12 +14,14 @@ from shared_submit_interface import database
 from shared_submit_interface import validator
 from shared_submit_interface import formatter
 
+
 def R (uri_path, endpoint):  # pylint: disable=invalid-name
     """
     Short-hand for defining a route between a URI and its
     entry-point procedure.
     """
     return Rule (uri_path, endpoint=endpoint)
+
 
 class WebUserInterfaceServer:
     """This class implements the HTTP interaction for the web user interface."""
@@ -100,8 +102,8 @@ class WebUserInterfaceServer:
 
         return self.error_500 ()
 
-    ## REQUEST CHECKERS
-    ## ------------------------------------------------------------------------
+    # REQUEST CHECKERS
+    # -------------------------------------------------------------------------
 
     def accepts_content_type (self, request, content_type, strict=True):
         """Procedure to check whether the client accepts a content type."""
@@ -137,8 +139,8 @@ class WebUserInterfaceServer:
         """Procedure to check whether the client accepts JSON."""
         return self.accepts_content_type (request, "application/json", strict=False)
 
-    ## ERROR HANDLERS
-    ## ------------------------------------------------------------------------
+    # ERROR HANDLERS
+    # -------------------------------------------------------------------------
 
     def error_400_list (self, request, errors):
         """Procedure to respond with HTTP 400 with a list of error messages."""
