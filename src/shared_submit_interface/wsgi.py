@@ -34,8 +34,8 @@ class WebUserInterfaceServer:
             R("/api/v1/repositories",             self.api_v1_repositories),
             R("/api/v1/datasets",                 self.api_v1_datasets),
             R("/api/v1/dataset/<dataset_uuid>",   self.api_v1_dataset),
-            R("/draft-dataset",                   self.draft_dataset),
-            R("/draft-dataset/<dataset_uuid>",    self.draft_dataset),
+            R("/draft-dataset",                   self.ui_draft_dataset),
+            R("/draft-dataset/<dataset_uuid>",    self.ui_draft_dataset),
             R("/robots.txt",                      self.robots_txt),
         ])
         self.allow_crawlers   = False
@@ -336,7 +336,7 @@ class WebUserInterfaceServer:
 
         return self.respond_204 ()
 
-    def draft_dataset (self, request, dataset_uuid=None):
+    def ui_draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""
 
         if request.method in ("GET", "HEAD"):
