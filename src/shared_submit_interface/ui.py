@@ -17,14 +17,18 @@ from shared_submit_interface.convenience import value_or_none, add_logging_level
 class ConfigFileNotFound(Exception):
     """Raised when the database is not queryable."""
 
+
 class UnsupportedSAMLProtocol(Exception):
     """Raised when an unsupported SAML protocol is used."""
+
 
 class DependencyNotAvailable(Exception):
     """Raised when a required software dependency isn't available."""
 
+
 class MissingConfigurationError(Exception):
     """Raised when a crucial piece of configuration is missing."""
+
 
 def show_version ():
     """Show the program's version."""
@@ -32,9 +36,9 @@ def show_version ():
     print("This is djehuty v0.0.1")
     sys.exit(0)
 
+
 def show_help ():
     """Show a GNU-style help message."""
-
     print ("""This is shared-submit-interface.
 
 Available options:
@@ -46,20 +50,22 @@ Available options:
   --initialize         -i Populate the RDF store with default triples.\n""")
     sys.exit(0)
 
+
 def sigint_handler (sig, frame):  # pylint: disable=unused-argument
     """Signal handler for SIGINT and SIGTERM."""
     logger = logging.getLogger(__name__)
     logger.info ("Received shutdown signal.  Goodbye!")
     sys.exit(0)
 
+
 def config_value (xml_root, path, command_line=None, fallback=None, return_node=False):
     """Procedure to get the value a config item should have at run-time."""
 
-    ## Prefer command-line arguments.
+    # Prefer command-line arguments.
     if command_line:
         return command_line
 
-    ## Read from the configuration file.
+    # Read from the configuration file.
     if xml_root:
         item = xml_root.find(path)
         if item is not None:
@@ -67,8 +73,9 @@ def config_value (xml_root, path, command_line=None, fallback=None, return_node=
                 return item
             return item.text
 
-    ## Fall back to the fallback value.
+    # Fall back to the fallback value.
     return fallback
+
 
 def read_boolean_value (xml_root, path, default_value, logger):
     """Parses a boolean option and sets DESTINATION if the option is present."""
@@ -80,6 +87,7 @@ def read_boolean_value (xml_root, path, default_value, logger):
         logger.error ("Erroneous value for '%s' - assuming '%s'.", path, default_value)
 
     return default_value
+
 
 def configure_file_logging (log_file, inside_reload, logger):
     """Procedure to set up logging to a file."""
@@ -106,6 +114,7 @@ def configure_file_logging (log_file, inside_reload, logger):
         for handler in log.handlers[:]:
             log.removeHandler(handler)
         log.addHandler(file_handler)
+
 
 def read_pre_shared_keys_for_repositories (server, xml_root, logger):
     """Procedure to read integration keys for DANS and 4TU."""
@@ -223,6 +232,7 @@ def read_configuration_file (config, server, config_file, logger, config_files):
 
     return config
 
+
 def main_inner ():
     """The main entry point of the program."""
 
@@ -295,6 +305,7 @@ def main_inner ():
         pass
 
     return None
+
 
 def main ():
     """Wrapper to catch KeyboardInterrupts for main_inner."""
