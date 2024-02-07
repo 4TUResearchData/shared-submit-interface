@@ -1,0 +1,26 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT ?account_uuid ?uuid ?token ?name ?created_date ?editable
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?session             rdf:type                 ssi:Session .
+    ?session             ssi:account              ?account .
+    ?session             ssi:token                ?token .
+    ?session             ssi:active               "true"^^xsd:boolean .
+    OPTIONAL { ?session  ssi:mfa_token            ?mfa_token . }
+    OPTIONAL { ?session  ssi:name                 ?name . }
+    OPTIONAL { ?session  ssi:created_date         ?created_date . }
+    OPTIONAL { ?session  ssi:editable             ?editable . }
+  }
+  FILTER (?account = <account:{{account_uuid}}>)
+  {%- if session_uuid is not none: %}
+  FILTER (?session = <session:{{session_uuid}}>)
+  {%- endif %}{% if mfa_token is not none: %}
+  FILTER (?mfa_token = {{mfa_token}})
+  {%- endif %}
+
+  BIND (STRAFTER(STR(?session), "session:") AS ?uuid)
+  BIND (STRAFTER(STR(?account), "account:") AS ?account_uuid)
+}
+ORDER BY DESC(?created_date)
+{% endblock %}

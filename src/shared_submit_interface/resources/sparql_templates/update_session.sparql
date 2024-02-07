@@ -1,0 +1,35 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+DELETE {
+  GRAPH <{{state_graph}}> {
+    {%- if name is not none: %}
+    ?session ssi:editable   ?editable .
+    ?session ssi:name       ?name .
+    {%- endif %}{% if active is not none: %}
+    ?session ssi:active     ?active .
+    {%- endif %}
+  }
+}
+INSERT {
+  GRAPH <{{state_graph}}> {
+    {%- if name is not none: %}
+    ?session ssi:name       "{{name | safe}}"^^xsd:string .
+    {%- endif %}{% if active is not none: %}
+    ?session ssi:active     {{active | safe}} .
+    {%- endif %}
+  }
+}
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?session  rdf:type                   ssi:Session .
+    ?session  ssi:account               ?account .
+    {%- if name is not none: %}
+    ?session  ssi:name                  ?name .
+    ?session  ssi:editable              1 .
+    {%- endif %}
+    ?session  ssi:active                ?active .
+  }
+  FILTER (?account = <account:{{account_uuid}}>)
+  FILTER (?session = <session:{{session_uuid}}>)
+}
+{% endblock %}

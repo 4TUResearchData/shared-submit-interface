@@ -7,12 +7,24 @@ import signal
 import sys
 import logging
 import os
+import json
 
 from defusedxml import ElementTree
 from werkzeug.serving import run_simple
 from rdflib.plugins.stores import berkeleydb
 from shared_submit_interface import wsgi
 from shared_submit_interface.convenience import value_or_none, add_logging_level, index_exists
+
+# Even though we don't use these imports in 'ui', the state of
+# SAML2_DEPENDENCY_LOADED is important to catch the situation
+# in which this dependency is required due to the run-time configuration.
+try:
+    from onelogin.saml2.auth import OneLogin_Saml2_Auth  # pylint: disable=unused-import
+    from onelogin.saml2.errors import OneLogin_Saml2_Error  # pylint: disable=unused-import
+    SAML2_DEPENDENCY_LOADED = True
+except (ImportError, ModuleNotFoundError):
+    SAML2_DEPENDENCY_LOADED = False
+
 
 class ConfigFileNotFound(Exception):
     """Raised when the database is not queryable."""
@@ -143,6 +155,202 @@ def read_pre_shared_keys_for_repositories (server, xml_root, logger):
 
     return None
 
+
+def read_automatic_login_configuration (server, xml_root):
+    """Procedure to parse and set automatic login for development setups."""
+    automatic_login_email = config_value (xml_root, "authentication/automatic-login-email")
+    if (automatic_login_email is not None
+        and server.saml_config is None):
+        server.identity_provider = "automatic-login"
+        server.automatic_login_email = automatic_login_email
+
+
+def read_saml_configuration (server, xml_root, logger):
+    """Read the SAML configuration from XML_ROOT."""
+
+    saml = xml_root.find("authentication/saml")
+    if not saml:
+        return None
+
+    saml_version = None
+    if "version" in saml.attrib:
+        saml_version = saml.attrib["version"]
+
+    if saml_version != "2.0":
+        logger.error ("Only SAML 2.0 is supported.")
+        raise UnsupportedSAMLProtocol
+
+    saml_strict = bool(int(config_value (saml, "strict", None, True)))
+    saml_debug  = bool(int(config_value (saml, "debug", None, False)))
+
+    ## Service Provider settings
+    service_provider     = saml.find ("service-provider")
+    if service_provider is None:
+        logger.error ("Missing service-provider information for SAML.")
+
+    saml_sp_x509         = config_value (service_provider, "x509-certificate")
+    saml_sp_private_key  = config_value (service_provider, "private-key")
+
+    ## Service provider metadata
+    sp_metadata          = service_provider.find ("metadata")
+    if sp_metadata is None:
+        logger.error ("Missing service provider's metadata for SAML.")
+
+    organization_name    = config_value (sp_metadata, "display-name")
+    organization_url     = config_value (sp_metadata, "url")
+
+    sp_tech_contact      = sp_metadata.find ("./contact[@type='technical']")
+    if sp_tech_contact is None:
+        logger.error ("Missing technical contact information for SAML.")
+    sp_tech_email        = config_value (sp_tech_contact, "email")
+    if sp_tech_email is None:
+        sp_tech_email = "-"
+
+    sp_admin_contact     = sp_metadata.find ("./contact[@type='administrative']")
+    if sp_admin_contact is None:
+        logger.error ("Missing administrative contact information for SAML.")
+    sp_admin_email        = config_value (sp_admin_contact, "email")
+    if sp_admin_email is None:
+        sp_admin_email = "-"
+
+    sp_support_contact   = sp_metadata.find ("./contact[@type='support']")
+    if sp_support_contact is None:
+        logger.error ("Missing support contact information for SAML.")
+    sp_support_email        = config_value (sp_support_contact, "email")
+    if sp_support_email is None:
+        sp_support_email = "-"
+
+    ## Identity Provider settings
+    identity_provider    = saml.find ("identity-provider")
+    if identity_provider is None:
+        logger.error ("Missing identity-provider information for SAML.")
+
+    saml_idp_entity_id   = config_value (identity_provider, "entity-id")
+    saml_idp_x509        = config_value (identity_provider, "x509-certificate")
+
+    sso_service          = identity_provider.find ("single-signon-service")
+    if sso_service is None:
+        logger.error ("Missing SSO information of the identity-provider for SAML.")
+
+    saml_idp_sso_url     = config_value (sso_service, "url")
+    saml_idp_sso_binding = config_value (sso_service, "binding")
+
+    server.identity_provider = "saml"
+
+    ## Create an almost-ready-to-serialize configuration structure.
+    ## The SP entityId will and ACS URL be generated at a later time.
+    server.saml_config = {
+        "strict": saml_strict,
+        "debug":  saml_debug,
+        "sp": {
+            "entityId": None,
+            "assertionConsumerService": {
+                "url": None,
+                "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+            },
+            "singleLogoutService": {
+                "url": None,
+                "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            },
+            "NameIDFormat": "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent",
+            "x509cert": saml_sp_x509,
+            "privateKey": saml_sp_private_key
+        },
+        "idp": {
+            "entityId": saml_idp_entity_id,
+            "singleSignOnService": {
+                "url": saml_idp_sso_url,
+                "binding": saml_idp_sso_binding
+            },
+            "singleLogoutService": {
+                "url": None,
+                "binding": None
+            },
+            "x509cert": saml_idp_x509
+        },
+        "security": {
+            "nameIdEncrypted": False,
+            "authnRequestsSigned": True,
+            "logoutRequestSigned": True,
+            "logoutResponseSigned": True,
+            "signMetadata": True,
+            "wantMessagesSigned": False,
+            "wantAssertionsSigned": False,
+            "wantNameId" : True,
+            "wantNameIdEncrypted": False,
+            "wantAssertionsEncrypted": False,
+            "allowSingleLabelDomains": False,
+            "signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+            "digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256",
+            "rejectDeprecatedAlgorithm": True
+        },
+        "contactPerson": {
+            "technical": {
+                "givenName": "Technical support",
+                "emailAddress": sp_tech_email
+            },
+            "support": {
+                "givenName": "General support",
+                "emailAddress": sp_support_email
+            },
+            "administrative": {
+                "givenName": "Administrative support",
+                "emailAddress": sp_admin_email
+            }
+        },
+        "organization": {
+            "nl": {
+                "name": organization_name,
+                "displayname": organization_name,
+                "url": organization_url
+            },
+            "en": {
+                "name": organization_name,
+                "displayname": organization_name,
+                "url": organization_url
+            }
+        }
+    }
+
+    del saml_sp_x509
+    del saml_sp_private_key
+    return None
+
+
+def setup_saml_service_provider (server, logger):
+    """Write the SAML configuration file to disk and set up its metadata."""
+    ## python3-saml wants to read its configuration from a file,
+    ## but unfortunately we can only indicate the directory for that
+    ## file.  Therefore, we create a separate directory in the cache
+    ## for this purpose and place the file in that directory.
+    if server.identity_provider == "saml":
+        if not SAML2_DEPENDENCY_LOADED:
+            logger.error ("Missing python3-saml dependency.")
+            logger.error ("Cannot initiate authentication with SAML.")
+            raise DependencyNotAvailable
+
+        saml_cache_dir = os.path.join(server.db.cache.storage, "saml-config")
+        os.makedirs (saml_cache_dir, mode=0o700, exist_ok=True)
+        if os.path.isdir (saml_cache_dir):
+            filename  = os.path.join (saml_cache_dir, "settings.json")
+            saml_base_url = f"{server.base_url}/saml"
+            saml_idp_binding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+            # pylint: disable=unsubscriptable-object
+            # PyLint assumes server.saml_config is None, but we can be certain
+            # it contains a saml configuration, because otherwise
+            # server.identity_provider wouldn't be set to "saml".
+            server.saml_config["sp"]["entityId"] = saml_base_url
+            server.saml_config["sp"]["assertionConsumerService"]["url"] = f"{saml_base_url}/login"
+            server.saml_config["idp"]["singleSignOnService"]["binding"] = saml_idp_binding
+            # pylint: enable=unsubscriptable-object
+            config_fd = os.open (filename, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            with open (config_fd, "w", encoding="utf-8") as file_stream:
+                json.dump(server.saml_config, file_stream)
+            server.saml_config_path = saml_cache_dir
+        else:
+            logger.error ("Failed to create '%s'.", saml_cache_dir)
+
+
 def read_configuration_file (config, server, config_file, logger, config_files):
     """Procedure to parse a configuration file."""
 
@@ -176,6 +384,10 @@ def read_configuration_file (config, server, config_file, logger, config_files):
         config["use_reloader"]  = config_value (xml_root, "live-reload", use_reloader)
         config["use_debugger"]  = config_value (xml_root, "debug-mode", use_debugger)
 
+        production_mode = xml_root.find ("production")
+        if production_mode is not None:
+            server.in_production = bool(int(production_mode.text))
+
         enable_query_audit_log = xml_root.find ("enable-query-audit-log")
         if enable_query_audit_log is not None:
             config["transactions_directory"] = enable_query_audit_log.attrib.get("transactions-directory")
@@ -199,6 +411,8 @@ def read_configuration_file (config, server, config_file, logger, config_files):
             server.db.update_endpoint = update_endpoint
 
         read_pre_shared_keys_for_repositories (server, xml_root, logger)
+        read_saml_configuration (server, xml_root, logger)
+        read_automatic_login_configuration (server, xml_root)
 
         for include_element in xml_root.iter('include'):
             include = include_element.text
@@ -248,12 +462,12 @@ def main_inner ():
         prog     = 'shared-submit-interface',
         add_help = False)
 
-    parser.add_argument('--help',       '-h', action='store_true')
-    parser.add_argument('--version',    '-v', action='store_true')
-    parser.add_argument('--config-file','-c', type=str, default=None)
-    parser.add_argument('--debug',      '-d', action='store_true')
-    parser.add_argument('--dev-reload', '-r', action='store_true')
-    parser.add_argument('--initialize', '-i', action='store_true')
+    parser.add_argument('--help',        '-h', action='store_true')
+    parser.add_argument('--version',     '-v', action='store_true')
+    parser.add_argument('--config-file', '-c', type=str, default=None)
+    parser.add_argument('--debug',       '-d', action='store_true')
+    parser.add_argument('--dev-reload',  '-r', action='store_true')
+    parser.add_argument('--initialize',  '-i', action='store_true')
 
     # When using PyInstaller and Nuitka, argv[0] seems to get duplicated.
     # In the case of Nuitka, relative paths are converted to absolute paths.
@@ -286,6 +500,7 @@ def main_inner ():
                           "or the 'berkeleydb' Python package is missing."))
             raise DependencyNotAvailable
 
+        setup_saml_service_provider (server, logger)
         server.db.setup_sparql_endpoint ()
 
         if arguments.initialize:

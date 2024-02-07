@@ -1,0 +1,42 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT DISTINCT ?active ?created_date ?email ?first_name ?group_id ?biography
+                ?uuid ?last_name ?maximum_file_size ?modified_date ?job_title
+                ?location ?account_id ?domain ?twitter ?linkedin ?website
+                ?author_uuid ?profile_image ?orcid
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?account             rdf:type                  ssi:Account .
+    OPTIONAL { ?account  ssi:id                    ?account_id . }
+    OPTIONAL { ?account  ssi:active                ?active . }
+    OPTIONAL { ?account  ssi:job_title             ?job_title . }
+    OPTIONAL { ?account  ssi:location              ?location . }
+    OPTIONAL { ?account  ssi:twitter               ?twitter . }
+    OPTIONAL { ?account  ssi:linkedin              ?linkedin . }
+    OPTIONAL { ?account  ssi:website               ?website . }
+    OPTIONAL { ?account  ssi:biography             ?biography . }
+    OPTIONAL { ?account  ssi:created_date          ?created_date . }
+    OPTIONAL { ?account  ssi:email                 ?email . }
+    OPTIONAL { ?account  ssi:first_name            ?first_name . }
+    OPTIONAL { ?account  ssi:last_name             ?last_name . }
+    OPTIONAL { ?account  ssi:profile_image         ?profile_image . }
+    OPTIONAL { ?account  ssi:maximum_file_size     ?maximum_file_size . }
+    OPTIONAL { ?account  ssi:modified_date         ?modified_date . }
+    OPTIONAL {
+      ?author            rdf:type                  ssi:Author ;
+                         ssi:account               ?account .
+      OPTIONAL { ?author ssi:orcid_id              ?orcid . }
+    }
+  }
+  BIND(STRAFTER(STR(?account), "account:") AS ?uuid)
+  BIND(COALESCE (STRAFTER(STR(?author), "author:"), "unknown") AS ?author_uuid)
+
+  {%- if account_uuid is not none %}
+  FILTER (?account = <account:{{account_uuid}}>)
+  {%- endif %}{% if is_active is not none %}
+  FILTER (?active = {{is_active}})
+  {%- endif %}{% if email is not none %}
+  FILTER (LCASE(STR(?email)) = LCASE(STR({{email | safe}})))
+  {%- endif %}
+}
+{% endblock %}

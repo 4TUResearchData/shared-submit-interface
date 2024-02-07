@@ -1,0 +1,18 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT DISTINCT ?uuid ?email ?first_name ?last_name ?created_date ?modified_date
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?account             rdf:type                  ssi:Account .
+    ?account             ssi:email                 ?email .
+    OPTIONAL { ?account  ssi:first_name            ?first_name . }
+    OPTIONAL { ?account  ssi:last_name             ?last_name . }
+    OPTIONAL { ?account  ssi:modified_date         ?modified_date . }
+    OPTIONAL { ?account  ssi:created_date          ?created_date . }
+
+    BIND(STRAFTER(STR(?account), "account:") AS ?uuid)
+  }
+  ## Wrap in STR for compatibility with Virtuoso.
+  FILTER (LCASE(STR(?email)) = LCASE(STR({{email | safe}})))
+}
+{% endblock %}

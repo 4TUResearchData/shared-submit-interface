@@ -3,6 +3,7 @@
 import os
 import logging
 import uuid
+import secrets
 from datetime import datetime
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
@@ -34,6 +35,9 @@ class SparqlInterface:
         self.sparql_is_up = False
         self.enable_query_audit_log = False
         self.store        = None
+
+    # SPARQL INTERACTION BITS
+    # -------------------------------------------------------------------------
 
     def setup_sparql_endpoint (self):
         """Procedure to be called after setting the 'endpoint' members."""
@@ -251,6 +255,122 @@ class SparqlInterface:
 
         return False
 
+    def initialize_database (self):
+        """Procedure to initialize the database."""
+
+        # Do not re-initialize.
+        is_initialized = self.__run_query (self.__query_from_template ("is_initialized"))
+        if is_initialized:
+            self.log.info ("Skipping re-initialization of the state-graph.")
+            return True
+
+        graph = Graph ()
+        organizations = self.read_organizations_from_surf_idps_metadata ()
+        for organization in organizations:
+            uri = URIRef(rdf.uuid_to_uri (organization["uuid"], "organization"))
+            rdf.add (graph, uri, RDF.type, rdf.SSI["Organization"], "uri")
+            rdf.add (graph, uri, rdf.SSI["name"], organization["name"], XSD.string)
+            rdf.add (graph, uri, rdf.SSI["url"], organization["url"], "uri")
+
+        rdf.add (graph, URIRef("this"), rdf.SSI["initialized"], True, XSD.boolean)
+        query = self.__insert_query_for_graph (graph)
+        return self.__run_query (query)
+
+    # USER SESSION BITS
+    # -------------------------------------------------------------------------
+
+    def insert_session (self, account_uuid, name=None, token=None, editable=False):
+        """Procedure to add a session token for an account_uuid."""
+
+        if account_uuid is None:
+            return None, None, None
+
+        account = self.account_by_uuid (account_uuid)
+        if account is None:
+            return None, None, None
+
+        if token is None:
+            token = secrets.token_hex (64)
+
+        current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
+
+        graph       = Graph()
+        link_uri    = rdf.unique_node ("session")
+        account_uri = URIRef(rdf.uuid_to_uri (account_uuid, "account"))
+
+        graph.add ((link_uri, RDF.type,                rdf.SSI["Session"]))
+        graph.add ((link_uri, rdf.SSI["account"],      account_uri))
+        graph.add ((link_uri, rdf.SSI["created_date"], Literal(current_time, datatype=XSD.dateTime)))
+        graph.add ((link_uri, rdf.SSI["name"],         Literal(name, datatype=XSD.string)))
+        graph.add ((link_uri, rdf.SSI["token"],        Literal(token, datatype=XSD.string)))
+        graph.add ((link_uri, rdf.SSI["editable"],     Literal(editable, datatype=XSD.boolean)))
+        graph.add ((link_uri, rdf.SSI["active"],       Literal(True, datatype=XSD.boolean)))
+
+        if self.add_triples_from_graph (graph):
+            return token, None, rdf.uri_to_uuid (link_uri)
+
+        return None, None, None
+
+    def update_session (self, account_uuid, session_uuid, name=None, active=None):
+        """Procedure to edit a session."""
+
+        query = self.__query_from_template ("update_session", {
+            "account_uuid":  account_uuid,
+            "session_uuid":  session_uuid,
+            "name":          name,
+            "active":        rdf.escape_boolean_value (active)
+        })
+
+        return self.__run_query (query)
+
+    def delete_all_sessions (self):
+        """Procedure to delete all sessions."""
+
+        query = self.__query_from_template ("delete_sessions")
+        return self.__run_query (query)
+
+    def delete_inactive_session_by_uuid (self, session_uuid):
+        """Procedure to remove an inactive session by its UUID alone."""
+
+        query = self.__query_from_template ("delete_inactive_session_by_uuid", {
+            "session_uuid": session_uuid
+        })
+
+        return self.__run_query (query)
+
+    def delete_session_by_uuid (self, account_uuid, session_uuid):
+        """Procedure to remove a session from the state graph."""
+
+        query   = self.__query_from_template ("delete_session_by_uuid", {
+            "session_uuid":  session_uuid,
+            "account_uuid":  account_uuid
+        })
+
+        return self.__run_query (query)
+
+    def delete_session (self, token):
+        """Procedure to remove a session from the state graph."""
+
+        if token is None:
+            return True
+
+        query = self.__query_from_template ("delete_session", {"token": token})
+        return self.__run_query (query)
+
+    def sessions (self, account_uuid, session_uuid=None, mfa_token=None):
+        """Returns the sessions for an account."""
+
+        query = self.__query_from_template ("account_sessions", {
+            "account_uuid":  account_uuid,
+            "session_uuid":  session_uuid,
+            "mfa_token":     mfa_token
+        })
+
+        return self.__run_query (query)
+
+    # ORGANIZATIONS
+    # -------------------------------------------------------------------------
+
     def read_organizations_from_surf_idps_metadata (self):
         """Returns a list of organizations by querying SURFContext's identity provider metadata."""
 
@@ -285,27 +405,6 @@ class SparqlInterface:
 
         return organizations
 
-    def initialize_database (self):
-        """Procedure to initialize the database."""
-
-        # Do not re-initialize.
-        is_initialized = self.__run_query (self.__query_from_template ("is_initialized"))
-        if is_initialized:
-            self.log.info ("Skipping re-initialization of the state-graph.")
-            return True
-
-        graph = Graph ()
-        organizations = self.read_organizations_from_surf_idps_metadata ()
-        for organization in organizations:
-            uri = URIRef(rdf.uuid_to_uri (organization["uuid"], "organization"))
-            rdf.add (graph, uri, RDF.type, rdf.SSI["Organization"], "uri")
-            rdf.add (graph, uri, rdf.SSI["name"], organization["name"], XSD.string)
-            rdf.add (graph, uri, rdf.SSI["url"], organization["url"], "uri")
-
-        rdf.add (graph, URIRef("this"), rdf.SSI["initialized"], True, XSD.boolean)
-        query = self.__insert_query_for_graph (graph)
-        return self.__run_query (query)
-
     def organizations (self, organization_uuid=None, search_for=None):
         """Returns a list of organizations on success or None on failure."""
         query = self.__query_from_template ("organizations", {
@@ -313,6 +412,9 @@ class SparqlInterface:
             "search_for": search_for
         })
         return self.__run_query (query)
+
+    # DATASETS
+    # -------------------------------------------------------------------------
 
     def datasets (self, dataset_uuid=None):
         """Returns a list of datasets on success or None on failure."""
@@ -353,3 +455,56 @@ class SparqlInterface:
         })
 
         return self.__run_query (query)
+
+    # ACCOUNTS
+    # -------------------------------------------------------------------------
+
+    def insert_account (self, email=None, first_name=None, last_name=None):
+        """Procedure to create an account."""
+
+        graph       = Graph()
+        account_uri = rdf.unique_node ("account")
+
+        rdf.add (graph, account_uri, RDF.type,              rdf.SSI["Account"], "uri")
+        rdf.add (graph, account_uri, rdf.SSI["first_name"], first_name, XSD.string)
+        rdf.add (graph, account_uri, rdf.SSI["last_name"],  last_name,  XSD.string)
+        rdf.add (graph, account_uri, rdf.SSI["email"],      email,      XSD.string)
+
+        if self.add_triples_from_graph (graph):
+            return rdf.uri_to_uuid (account_uri)
+
+        return None
+
+    def accounts (self, account_uuid=None, order=None, order_direction=None,
+                  limit=None, offset=None, is_active=None, email=None):
+        """Returns accounts."""
+
+        query = self.__query_from_template ("accounts", {
+            "account_uuid": account_uuid,
+            "is_active": is_active,
+            "email": rdf.escape_string_value(email),
+        })
+        query += rdf.sparql_suffix (order, order_direction, limit, offset)
+        return self.__run_query (query, query, "accounts")
+
+    def account_by_uuid (self, account_uuid):
+        """Returns an account record or None."""
+
+        results = self.accounts(account_uuid)
+        if results:
+            return results[0]
+
+        return None
+
+    def account_by_email (self, email):
+        """Returns the account matching EMAIL."""
+
+        query = self.__query_from_template ("account_by_email", {
+            "email":  rdf.escape_string_value (email)
+        })
+
+        results = self.__run_query (query)
+        if results:
+            return results[0]
+
+        return None
