@@ -184,7 +184,7 @@ class SparqlInterface:
                     self.log.warning ("Retrying SPARQL request due to service unavailability (%s)",
                                       retries)
                     return self.__run_query (query, cache_key_string=cache_key_string,
-                                             prefix=prefix, retries=(retries - 1))
+                                             prefix=prefix, retries=(retries - 1)) # pylint: disable=superfluous-parens
 
                 self.log.warning ("Giving up on retrying SPARQL request.")
 
