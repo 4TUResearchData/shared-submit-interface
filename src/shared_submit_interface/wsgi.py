@@ -15,13 +15,14 @@ from shared_submit_interface import validator
 from shared_submit_interface import formatter
 from shared_submit_interface.convenience import value_or_none
 
-## Error handling for loading python3-saml is done in 'ui'.
-## So if it fails here, we can safely assume we don't need it.
+# Error handling for loading python3-saml is done in 'ui'.
+# So if it fails here, we can safely assume we don't need it.
 try:
     from onelogin.saml2.auth import OneLogin_Saml2_Auth
     from onelogin.saml2.errors import OneLogin_Saml2_Error
 except (ImportError, ModuleNotFoundError):
     pass
+
 
 def R (uri_path, endpoint):  # pylint: disable=invalid-name
     """
@@ -275,12 +276,12 @@ class WebUserInterfaceServer:
         """Turns a werkzeug request into one that python3-saml understands."""
 
         return {
-            ## Always assume HTTPS.  A proxy server may mask it.
+            # Always assume HTTPS.  A proxy server may mask it.
             "https":       "on",
-            ## Override the internal HTTP host because a proxy server masks the
-            ## actual HTTP host used.  Fortunately, we pre-configure the
-            ## expected HTTP host in the form of the "base_url".  So we strip
-            ## off the protocol prefix.
+            # Override the internal HTTP host because a proxy server masks the
+            # actual HTTP host used.  Fortunately, we pre-configure the
+            # expected HTTP host in the form of the "base_url".  So we strip
+            # off the protocol prefix.
             "http_host":   self.base_url.split("://")[1],
             "script_name": request.path,
             "get_data":    request.args.copy(),
@@ -316,7 +317,7 @@ class WebUserInterfaceServer:
             self.log.error ("SAML authentication failed.")
             return None
 
-        ## Gather SAML session information.
+        # Gather SAML session information.
         session = {}
         session['samlNameId']                = saml_auth.get_nameid()
         session['samlNameIdFormat']          = saml_auth.get_nameid_format()
@@ -324,7 +325,7 @@ class WebUserInterfaceServer:
         session['samlNameIdSPNameQualifier'] = saml_auth.get_nameid_spnq()
         session['samlSessionIndex']          = saml_auth.get_session_index()
 
-        ## Gather attributes from user.
+        # Gather attributes from user.
         record               = {}
         attributes           = saml_auth.get_attributes()
         record["session"]    = session
@@ -470,8 +471,8 @@ class WebUserInterfaceServer:
         account_uuid = None
         account      = None
 
-        ## Automatic log in for development purposes only.
-        ## --------------------------------------------------------------------
+        # Automatic log in for development purposes only.
+        # ---------------------------------------------------------------------
         if self.automatic_login_email is not None and not self.in_production:
             account = self.db.account_by_email (self.automatic_login_email)
             if account is None:
@@ -479,11 +480,11 @@ class WebUserInterfaceServer:
             account_uuid = account["uuid"]
             self.log.access ("Account %s logged in via auto-login.", account_uuid) #  pylint: disable=no-member
 
-        ## SAML 2.0 authentication
-        ## --------------------------------------------------------------------
+        # SAML 2.0 authentication
+        # ---------------------------------------------------------------------
         elif self.identity_provider == "saml":
 
-            ## Initiate the login procedure.
+            # Initiate the login procedure.
             if request.method == "GET":
                 saml_auth   = self.__saml_auth (request)
                 redirect_url = saml_auth.login()
@@ -491,7 +492,7 @@ class WebUserInterfaceServer:
 
                 return response
 
-            ## Retrieve signed data from SURFConext via the user.
+            # Retrieve signed data from SURFConext via the user.
             if request.method == "POST":
                 if not self.accepts_html (request):
                     return self.error_406 ("text/html")
