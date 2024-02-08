@@ -505,7 +505,7 @@ def main_inner ():
 
         if arguments.initialize:
             logger.info ("Initialization complete.")
-            server.db.initialize_database ()
+            server.db.initialize_database (server.automatic_login_email)
             server.db.sparql.close()
             return None
 

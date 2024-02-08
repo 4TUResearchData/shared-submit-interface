@@ -255,7 +255,7 @@ class SparqlInterface:
 
         return False
 
-    def initialize_database (self):
+    def initialize_database (self, account_email=None):
         """Procedure to initialize the database."""
 
         # Do not re-initialize.
@@ -274,7 +274,14 @@ class SparqlInterface:
 
         rdf.add (graph, URIRef("this"), rdf.SSI["initialized"], True, XSD.boolean)
         query = self.__insert_query_for_graph (graph)
-        return self.__run_query (query)
+        result = self.__run_query (query)
+        if not result:
+            self.log.error ("Failed to insert organizations.")
+
+        if account_email:
+            return self.insert_account (email=account_email)
+
+        return True
 
     # USER SESSION BITS
     # -------------------------------------------------------------------------
