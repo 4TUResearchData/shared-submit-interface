@@ -527,7 +527,4 @@ class SparqlInterface:
         })
 
         results = self.__run_query (query)
-        if results:
-            return results[0]
-
-        return None
+        return results[0] if results else None
