@@ -497,6 +497,19 @@ class SparqlInterface:
         query += rdf.sparql_suffix (order, order_direction, limit, offset)
         return self.__run_query (query, query, "accounts")
 
+    def account_by_session_token (self, session_token):
+        """Returns an account record or None."""
+
+        if session_token is None:
+            return None
+
+        query = self.__query_from_template ("account_by_session_token", {
+            "token":       rdf.escape_string_value (session_token),
+        })
+
+        results = self.__run_query (query)
+        return results[0] if results else None
+
     def account_by_uuid (self, account_uuid):
         """Returns an account record or None."""
 

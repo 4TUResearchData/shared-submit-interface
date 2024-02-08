@@ -18,8 +18,10 @@ EXTRA_RESOURCES =                                                               
     shared_submit_interface/resources/html_templates/edit-dataset.html           \
     shared_submit_interface/resources/html_templates/home.html                   \
     shared_submit_interface/resources/html_templates/layout.html                 \
+    shared_submit_interface/resources/html_templates/my-datasets.html            \
     shared_submit_interface/resources/robots.txt                                 \
     shared_submit_interface/resources/sparql_templates/account_by_email.sparql   \
+    shared_submit_interface/resources/sparql_templates/account_by_session_token.sparql \
     shared_submit_interface/resources/sparql_templates/account_sessions.sparql   \
     shared_submit_interface/resources/sparql_templates/accounts.sparql           \
     shared_submit_interface/resources/sparql_templates/datasets.sparql           \

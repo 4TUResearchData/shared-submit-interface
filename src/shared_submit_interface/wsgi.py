@@ -47,6 +47,7 @@ class WebUserInterfaceServer:
             R("/draft-dataset",                   self.ui_draft_dataset),
             R("/login",                           self.ui_login),
             R("/logout",                          self.ui_logout),
+            R("/my-datasets",                     self.ui_my_datasets),
             R("/draft-dataset/<dataset_uuid>",    self.ui_draft_dataset),
             R("/robots.txt",                      self.robots_txt),
         ])
@@ -161,6 +162,19 @@ class WebUserInterfaceServer:
     # ERROR HANDLERS
     # -------------------------------------------------------------------------
 
+    def error_authorization_failed (self, request):
+        """Procedure to handle authorization failures."""
+        if self.accepts_html (request):
+            response = self.__render_template (request, "403.html")
+        else:
+            response = self.response (json.dumps({
+                "message": "Invalid or unknown session token",
+                "code":    "InvalidSessionToken"
+            }))
+
+        response.status_code = 403
+        return response
+
     def error_400_list (self, request, errors):
         """Procedure to respond with HTTP 400 with a list of error messages."""
         response = None
@@ -227,12 +241,57 @@ class WebUserInterfaceServer:
 
     def token_from_cookie (self, request, cookie_key=None):
         """Procedure to gather an access token from a HTTP cookie."""
+        if cookie_key is None:
+            cookie_key = self.cookie_key
+        return value_or_none (request.cookies, cookie_key)
+
+    def token_from_request (self, request):
+        """Procedure to get the access token from a HTTP request."""
         try:
-            if cookie_key is None:
-                cookie_key = self.cookie_key
-            return request.cookies[cookie_key]
+            token_string = self.token_from_cookie (request)
+            if token_string is None:
+                token_string = request.environ["HTTP_AUTHORIZATION"]
+            if isinstance(token_string, str) and token_string.startswith("token "):
+                token_string = token_string[6:]
+            return token_string
         except KeyError:
             return None
+
+    def account_uuid_from_request (self, request):
+        """Procedure to the account UUID for a HTTP request."""
+        token = self.token_from_request (request)
+        account = self.db.account_by_session_token (token)
+        if account is None:
+            self.log.error ("Attempt to authenticate with %s failed.", token)
+            return None
+        return value_or_none (account, "uuid")
+
+    def default_error_handling (self, request, methods, content_type):
+        """Procedure to handle both method and content type mismatches."""
+        if isinstance (methods, str):
+            methods = [methods]
+
+        if (request.method not in methods and
+            (not ("GET" in methods and request.method == "HEAD"))):
+            return self.error_405 (methods)
+
+        if not self.accepts_content_type (request, content_type, strict=False):
+            return self.error_406 (content_type)
+
+        return None
+
+    def default_authenticated_error_handling (self, request, methods, content_type):
+        """Procedure to handle method and content type mismatches as well authentication."""
+
+        handler = self.default_error_handling (request, methods, content_type)
+        if handler is not None:
+            return handler
+
+        account_uuid = self.account_uuid_from_request (request)
+        if account_uuid is None:
+            return self.error_authorization_failed (request)
+
+        return account_uuid
 
     def default_list_response (self, records, format_function, **parameters):
         """Procedure to respond a list of items."""
@@ -539,7 +598,7 @@ class WebUserInterfaceServer:
 
             self.log.access ("Created session %s for account %s.", session_uuid, account_uuid) #  pylint: disable=no-member
 
-            response = redirect ("/my/dashboard", code=302)
+            response = redirect ("/my-datasets", code=302)
             response.set_cookie (key=self.cookie_key, value=token, secure=self.in_production)
             return response
 
@@ -554,6 +613,14 @@ class WebUserInterfaceServer:
         self.db.delete_session (self.token_from_cookie (request))
         response.delete_cookie (key=self.cookie_key)
         return response
+
+    def ui_my_datasets (self, request):
+        """Implements /my-datasets."""
+        account_uuid = self.default_authenticated_error_handling (request, "GET", "text/html")
+        if isinstance (account_uuid, Response):
+            return account_uuid
+
+        return self.__render_template (request, "my-datasets.html")
 
     def ui_draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""
