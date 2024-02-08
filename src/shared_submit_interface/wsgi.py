@@ -445,6 +445,7 @@ class WebUserInterfaceServer:
         if request.method in ("GET", "HEAD"):
             accounts = self.db.accounts ()
             return self.default_list_response (accounts, formatter.account_record)
+        return self.error_406 ("GET")
 
     def api_v1_organizations (self, request):
         """Implements /api/v1/organizations."""
