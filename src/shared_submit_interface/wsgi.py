@@ -39,6 +39,7 @@ class WebUserInterfaceServer:
 
         self.url_map          = Map([
             R("/",                                self.ui_home),
+            R("/api/v1/accounts",                 self.api_v1_accounts),
             R("/api/v1/organizations",            self.api_v1_organizations),
             R("/api/v1/repositories",             self.api_v1_repositories),
             R("/api/v1/datasets",                 self.api_v1_datasets),
@@ -378,6 +379,13 @@ class WebUserInterfaceServer:
             output += "Disallow: /\n"
 
         return self.response (output, mimetype="text/plain")
+
+    def api_v1_accounts (self, request):
+        """Implements /api/v1/accounts."""
+
+        if request.method in ("GET", "HEAD"):
+            accounts = self.db.accounts ()
+            return self.default_list_response (accounts, formatter.account_record)
 
     def api_v1_organizations (self, request):
         """Implements /api/v1/organizations."""

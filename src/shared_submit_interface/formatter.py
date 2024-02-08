@@ -25,6 +25,15 @@ def dataset_record (record):
         "modified_date": to_timestamp (value_or_none (record, "modified_date"))
     }
 
+def account_record (record):
+    """Formats a account record."""
+    return {
+        "uuid":          value_or_none (record, "uuid"),
+        "email":         value_or_none (record, "email"),
+        "first_name":    value_or_none (record, "first_name"),
+        "last_name":     value_or_none (record, "last_name"),
+    }
+
 def organization_record (record):
     """Formats a organization record."""
     return {
