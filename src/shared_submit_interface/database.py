@@ -465,6 +465,9 @@ class SparqlInterface:
         graph       = Graph()
         account_uri = rdf.unique_node ("account")
 
+        if isinstance (email, str):
+            email = email.lower()
+
         rdf.add (graph, account_uri, RDF.type,              rdf.SSI["Account"], "uri")
         rdf.add (graph, account_uri, rdf.SSI["first_name"], first_name, XSD.string)
         rdf.add (graph, account_uri, rdf.SSI["last_name"],  last_name,  XSD.string)
