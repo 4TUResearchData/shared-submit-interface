@@ -2,9 +2,17 @@
 {% block headers %}
 <link href="/static/css/form.css" rel="stylesheet">
 {% endblock %}
+{% block steps %}
+<ul id="steps" class="action-buttons">
+  <li class="login-button">{% if not is_logged_in %}<a href="/login">{% endif %}Log in{% if is_logged_in %}</a>{% endif %}
+  <li>&#8594;
+  <li class="start-button">{% if is_logged_in %}<a href="/draft-dataset">{% endif %}Find repository{% if is_logged_in %}</a>{% endif %}
+  <li>&#8594;
+  <li class="transfer-button">Continue at the repository
+</ul>
+{% endblock %}
 {% block body %}
 <h1>Home</h1>
-<ul class="action-buttons">
-  <li class="start-button"><a href="/draft-dataset">Find repository</a>
-</ul>
+<p>This website helps to choose a suitable data repository for your data.</p>
+<p class="a-button"><a href="/login">Start here</a></p>
 {% endblock %}

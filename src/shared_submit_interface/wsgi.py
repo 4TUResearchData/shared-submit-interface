@@ -110,10 +110,14 @@ class WebUserInterfaceServer:
 
     def __render_template (self, request, template_name, **context):
         try:
-            template      = self.jinja.get_template (template_name)
-            parameters    = {
-                "base_url": self.base_url,
-                "path":     request.path,
+            template   = self.jinja.get_template (template_name)
+            token      = self.token_from_cookie (request)
+            account    = self.db.account_by_session_token (token)
+            parameters = {
+                "base_url":     self.base_url,
+                "path":         request.path,
+                "is_logged_in": account is not None,
+
             }
             return self.response (template.render({ **context, **parameters }),
                                   mimetype='text/html')
@@ -622,7 +626,8 @@ class WebUserInterfaceServer:
         if isinstance (account_uuid, Response):
             return account_uuid
 
-        return self.__render_template (request, "my-datasets.html")
+        datasets = self.db.datasets (account_uuid = account_uuid)
+        return self.__render_template (request, "my-datasets.html", datasets=datasets)
 
     def ui_draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""
@@ -640,8 +645,12 @@ class WebUserInterfaceServer:
 
             try:
                 dataset = self.db.datasets(dataset_uuid=dataset_uuid)[0]
-                return self.__render_template (request, "edit-dataset.html", dataset=dataset)
+                research_domains = self.db.research_domains ()
+                return self.__render_template (request, "edit-dataset.html",
+                                               dataset          = dataset,
+                                               research_domains = research_domains)
             except IndexError:
+                self.log.error ("Could not find draft dataset.")
                 return self.error_403 (request)
 
         return self.error_405 ("GET")

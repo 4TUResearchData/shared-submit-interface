@@ -165,6 +165,9 @@ ul.action-buttons li a {
     border-radius: .5em;
     text-decoration: none;
 }
+li.login-button a { background: #921357; color: #ffffff; }
+li.login-button a:hover { background: #b7186d; }
+li.login-button a:active { background: #7a1048; }
 li.save-button a { background: #139257; color: #ffffff; }
 li.save-button a:hover { background: #18b76d; }
 li.save-button a:active { background: #107a48; }
@@ -175,3 +178,4 @@ li.start-button a { background: #135792; color: #ffffff; }
 li.start-button a:hover { background: #186db7; }
 li.start-button a:active { background: #10487a; }
 div.options-wrapper select { width: 832pt !important; }
+#steps { margin-top: 1em; }

@@ -1,18 +1,41 @@
 {% extends "layout.html" %}
 {% block headers %}
+<link href="/static/css/main.css" rel="stylesheet">
+<link href="/static/css/form.css" rel="stylesheet">
+<style>
+  #datasets-table tbody tr td:last-child { border: solid 1px #ff0000; text-align: right; }
+</style>
+{% endblock %}
+{% block steps %}
+<ul id="steps" class="action-buttons">
+  <li class="login-button">Log in
+  <li>&#8594;
+  <li class="start-button">{% if is_logged_in %}<a href="/draft-dataset">{% endif %}Find repository{% if is_logged_in %}</a>{% endif %}
+  <li>&#8594;
+  <li class="transfer-button">Continue at the repository
+</ul>
 {% endblock %}
 {% block body %}
 <h1>My datasets</h1>
 
 <p>This page displays the datasets made through this service.  A dataset can be either in <code>draft</code> or <code>transfered</code> state.</p>
 
-<table id="datasets-table">
+<table id="datasets-table" class="corporate-identity-table">
   <thead>
     <th>Title</th>
     <th>State<th>
     <th>Last modified</th>
   </thead>
   <tbody>
+    {% for dataset in datasets %}
+    <tr>
+      <td><a href="/draft-dataset/{{dataset.uuid}}">{{dataset.title | default("Edit")}}</a></td>
+      <td>{% if dataset.is_transfered %}transfered{% else %}draft{% endif %}</td>
+      <td>{{dataset.modified_date}}</td>
+    </tr>
+    {% endfor %}
   </tbody>
 </table>
+
+<p class="a-button"><a href="/draft-dataset">Create a new dataset</a></p>
 {% endblock %}

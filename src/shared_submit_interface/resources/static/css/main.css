@@ -15,3 +15,30 @@ body,html { width: 100%; height: 100%; padding: 0em; margin: 0em; font-family: '
 #message p { padding: 1em; }
 .success { background: #009900; padding: 0em; margin: 0em; }
 .failure { background: #990000; padding: 0em; margin: 0em; }
+table { border:none; border-spacing: 0pt; border-collapse: collapse; }
+.corporate-identity-table {
+    width: 100%;
+    max-width: 880pt;
+    border: solid 2pt #ddd;
+}
+.corporate-identity-table thead tr { background: #ddd; }
+.corporate-identity-table thead tr th {
+    color: #000;
+    text-align: left;
+    padding: .5em;
+    z-index: 50;
+    border-top: none;
+    white-space: nowrap;
+    min-width: 60pt;
+}
+.corporate-identity-table tbody tr td { padding: .5em; z-index: 50; white-space: nowrap; }
+.corporate-identity-table thead tr th:last-child { text-align: right; }
+.corporate-identity-table tbody tr:nth-child(even) { background: #fafafa; }
+.corporate-identity-table tbody tr td:last-child { text-align: right; width: 130pt; }
+.corporate-identity-table tbody tr td:nth-child(1) {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    max-width: 572pt;
+}

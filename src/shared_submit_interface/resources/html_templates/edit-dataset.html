@@ -7,10 +7,20 @@
   jQuery(document).ready(function (){ activate("{{dataset.uuid}}"); });
 </script>
 {% endblock %}
+{% block steps %}
+<ul id="steps" class="action-buttons">
+  <li class="login-button">Log in
+  <li>&#8594;
+  <li class="start-button">Find repository
+  <li>&#8594;
+  <li class="transfer-button"><a href="/transfer-dataset">Continue at the repository</a>
+</ul>
+{% endblock %}
 {% block body %}
-<h1>Publish dataset</h1>
+<h1>Find repository</h1>
 
 <p>This form helps you choose a data repository and transfers the metadata to the appropriate repository.</p>
+<p>By entering the metadata below, a repository will be chosen for you.</p>
 
 <label for="title">Title</label>
 <input type="text" id="title" name="title" value="{{dataset.title}}" />
@@ -18,8 +28,19 @@
 <label for="affiliation">Affiliation</label>
 <input type="text" id="affiliation" name="affiliation" value="{{dataset.affiliation_name}}" />
 <input type="hidden" id="affiliation-uuid" value="{{dataset.affiliation_uuid}}" />
-<label for="affiliation">E-mail address</label>
-<input type="text" id="email" name="email" value="{{dataset.email}}" />
+<!--
+    <label for="affiliation">E-mail address</label>
+    <input type="text" id="email" name="email" value="{{dataset.email}}" />
+-->
+<label for="research-domain">Research domain</label>
+<div class="options-wrapper">
+  <select id="research-domain">
+    <option value="" disabled selected>Select research domain</option>
+    {%- for domain in research_domains %}
+    <option value="{{domain.uuid}}">{{domain.name}}</option>
+    {%- endfor %}
+  </select>
+</div>
 
 <label for="type-of-data">Type of data</label>
 <div class="options-wrapper">
