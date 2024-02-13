@@ -1,9 +1,10 @@
 {% extends "prefixes.sparql" %}
 {% block query %}
-SELECT DISTINCT ?uuid ?title ?affiliation_uuid ?affiliation_name ?email ?is_editable ?is_transfered ?created_date ?modified_date
+SELECT DISTINCT ?uuid ?account ?title ?affiliation_uuid ?affiliation_name ?email ?is_editable ?is_transfered ?created_date ?modified_date
 WHERE {
   GRAPH <{{state_graph}}> {
     ?dataset            rdf:type          ssi:Dataset .
+    ?dataset            ssi:account      ?account .
     OPTIONAL { ?dataset ssi:title         ?title . }
     OPTIONAL {
       ?dataset ssi:affiliation ?affiliation .
@@ -21,6 +22,9 @@ WHERE {
   }
   {%- if uuid is not none %}
   FILTER (?dataset = <dataset:{{uuid}}>)
+  {%- endif %}
+  {%- if account_uuid is not none %}
+  FILTER (?account = <account:{{account_uuid}}>)
   {%- endif %}
 }
 {% endblock %}

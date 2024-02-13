@@ -489,9 +489,9 @@ class WebUserInterfaceServer:
 
     def api_v1_dataset (self, request, dataset_uuid):
         """Implements /api/v1/dataset/<dataset_uuid>."""
-
-        if request.method != "PUT":
-            return self.error_405 ("PUT")
+        account_uuid = self.default_authenticated_error_handling (request, "PUT", "application/json")
+        if isinstance (account_uuid, Response):
+            return account_uuid
 
         if not validator.is_valid_uuid (dataset_uuid):
             return self.error_403 (request)
@@ -504,6 +504,7 @@ class WebUserInterfaceServer:
         errors = []
         record = request.get_json()
         parameters = {
+            "account_uuid":  account_uuid,
             "dataset_uuid":  dataset_uuid,
             "title":         validator.string_value (record, "title", 0, 255, False, error_list=errors),
             "affiliation":   validator.uuid_value (record, "affiliation", False, error_list=errors),
@@ -626,9 +627,13 @@ class WebUserInterfaceServer:
     def ui_draft_dataset (self, request, dataset_uuid=None):
         """Implements /draft-dataset."""
 
+        account_uuid = self.default_authenticated_error_handling (request, "GET", "text/html")
+        if isinstance (account_uuid, Response):
+            return account_uuid
+
         if request.method in ("GET", "HEAD"):
             if dataset_uuid is None:
-                dataset_uuid = self.db.create_dataset ()
+                dataset_uuid = self.db.create_dataset (account_uuid)
                 if dataset_uuid is None:
                     return self.error_500 ()
                 return redirect (f"/draft-dataset/{dataset_uuid}", code=302)

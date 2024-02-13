@@ -452,12 +452,15 @@ class SparqlInterface:
     # DATASETS
     # -------------------------------------------------------------------------
 
-    def datasets (self, dataset_uuid=None):
+    def datasets (self, dataset_uuid=None, account_uuid=None):
         """Returns a list of datasets on success or None on failure."""
-        query = self.__query_from_template ("datasets", { "uuid": dataset_uuid })
+        query = self.__query_from_template ("datasets", {
+            "uuid": dataset_uuid,
+            "account_uuid": account_uuid
+        })
         return self.__run_query (query)
 
-    def create_dataset (self):
+    def create_dataset (self, account_uuid):
         """Creates a dataset and returns a unique UUID."""
 
         graph = Graph()
@@ -469,13 +472,15 @@ class SparqlInterface:
         rdf.add (graph, uri, rdf.SSI["is_transfered"],    False)
         rdf.add (graph, uri, rdf.SSI["created_date"],     current_epoch, XSD.integer)
         rdf.add (graph, uri, rdf.SSI["modified_date"],    current_epoch, XSD.integer)
+        rdf.add (graph, uri, rdf.SSI["account"],          rdf.uuid_to_uri (account_uuid, "account"), "uri")
 
         if not self.add_triples_from_graph (graph):
             return None
 
         return rdf.uri_to_uuid (uri)
 
-    def update_dataset (self, dataset_uuid, title, affiliation, description, email, is_editable, is_transfered):
+    def update_dataset (self, account_uuid, dataset_uuid, title, affiliation,
+                        description, email, is_editable, is_transfered):
         """Updates the metadata of a dataset."""
 
         current_epoch = int(datetime.now().timestamp())
