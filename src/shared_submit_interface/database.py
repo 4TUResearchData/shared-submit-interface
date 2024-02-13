@@ -268,6 +268,24 @@ class SparqlInterface:
             return True
 
         graph = Graph ()
+        research_domains = [{ "name": "Social Sciences and Humanities",
+                              "url":  "https://ssh.datastations.nl/" },
+                            { "name": "Archaeology",
+                              "url":  "https://archaeology.datastations.nl/" },
+                            { "name": "Life Sciences",
+                              "url":  "https://lifesciences.datastations.nl/" },
+                            #{ "name": "Physical and Technical Sciences",
+                            #  "url":  "https://phys-techsciences.datastations.nl/" }
+                            { "name": "Physical and Technical Sciences",
+                              "url":  "https://data.4tu.nl/" },
+                            { "name": "Other", "url":  "" }]
+
+        for domain in research_domains:
+            uri = URIRef(uuid.uuid5 (uuid.NAMESPACE_OID, domain["name"]), "domain")
+            rdf.add (graph, uri, RDF.type, rdf.SSI["ResearchDomain"], "uri")
+            rdf.add (graph, uri, rdf.SSI["name"], domain["name"], XSD.string)
+            rdf.add (graph, uri, rdf.SSI["url"], domain["url"], XSD.string)
+
         organizations = self.read_organizations_from_surf_idps_metadata ()
         for organization in organizations:
             uri = URIRef(rdf.uuid_to_uri (organization["uuid"], "organization"))
@@ -376,6 +394,14 @@ class SparqlInterface:
             "mfa_token":     mfa_token
         })
 
+        return self.__run_query (query)
+
+    # RESEARCH DOMAINS
+    # -------------------------------------------------------------------------
+
+    def research_domains (self):
+        """Returns research domains."""
+        query = self.__query_from_template ("research_domains")
         return self.__run_query (query)
 
     # ORGANIZATIONS

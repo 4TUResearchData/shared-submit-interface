@@ -1,0 +1,10 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT DISTINCT ?uuid ?name ?url
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?domain   rdf:type   ssi:ResearchDomain .
+    ?domain   ssi:name   ?name .
+    ?domain   ssi:url    ?url .
+}
+{% endblock %}
