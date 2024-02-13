@@ -13,7 +13,7 @@ from rdflib.plugins.stores import sparqlstore
 from rdflib.store import CORRUPTED_STORE, NO_STORE
 from jinja2 import Environment, FileSystemLoader
 from shared_submit_interface import cache, rdf
-
+from shared_submit_interface.convenience import epoch_to_human_readable
 
 class SparqlInterface:
     """This class reads and writes data from a SPARQL endpoint."""
@@ -94,7 +94,10 @@ class SparqlInterface:
             if isinstance(row[name], Literal):
                 xsd_type = row[name].datatype
                 if xsd_type == XSD.integer:
-                    output[str(name)] = int(float(row[name]))
+                    if str(name).endswith("_date"):
+                        output[str(name)] = epoch_to_human_readable (int(row[name]))
+                    else:
+                        output[str(name)] = int(float(row[name]))
                 elif xsd_type == XSD.decimal:
                     output[str(name)] = int(float(row[name]))
                 elif xsd_type == XSD.boolean:

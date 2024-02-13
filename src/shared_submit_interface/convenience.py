@@ -4,6 +4,7 @@ the codebase.
 """
 
 import logging
+from datetime import datetime
 
 def value_or (record, key, other):
     """Return the value of KEY or OTHER."""
@@ -24,6 +25,10 @@ def index_exists (value, index):
         return False
 
     return True
+
+def epoch_to_human_readable (epoch):
+    """Returns a human-readable string for EPOCH."""
+    return datetime.utcfromtimestamp(epoch).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 def add_logging_level (level_name, level_number, method_name=None):
     """
