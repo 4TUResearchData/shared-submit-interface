@@ -4,7 +4,7 @@
 {% endblock %}
 {% block steps %}
 <ul id="steps" class="action-buttons">
-  <li class="login-button">{% if not is_logged_in %}<a href="/login">{% endif %}Log in{% if is_logged_in %}</a>{% endif %}
+  <li class="login-button">{% if not is_logged_in %}<a href="/login">{% endif %}Log in{% if not is_logged_in %}</a>{% endif %}
   <li>&#8594;
   <li class="start-button">{% if is_logged_in %}<a href="/draft-dataset">{% endif %}Find repository{% if is_logged_in %}</a>{% endif %}
   <li>&#8594;
