@@ -477,6 +477,23 @@ class SparqlInterface:
     # DATASETS
     # -------------------------------------------------------------------------
 
+    def recommend_data_repository (self, account_uuid=None, dataset_uuid=None):
+        """Returns which data repository to publish to."""
+        if account_uuid is None or dataset_uuid is None:
+            return None
+
+        query = self.__query_from_template ("recommend_data_repository", {
+            "dataset_uuid": dataset_uuid,
+            "account_uuid": account_uuid
+        })
+
+        try:
+            output = self.__run_query (query)[0]["repository"]
+            return output
+        except (IndexError, KeyError):
+            self.log.error ("Failed to gather repository in 'recommend_data_repository'.")
+            return None
+
     def datasets (self, dataset_uuid=None, account_uuid=None):
         """Returns a list of datasets on success or None on failure."""
         query = self.__query_from_template ("datasets", {

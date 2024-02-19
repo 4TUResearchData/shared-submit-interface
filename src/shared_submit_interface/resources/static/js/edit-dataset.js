@@ -25,6 +25,25 @@ function gather_form_data () {
     return form_data;
 }
 
+function transfer_dataset (event, dataset_uuid) {
+    event.preventDefault();
+    event.stopPropagation();
+    console.log ("Executing 'transfer_dataset'.");
+    save_dataset (event, dataset_uuid, notify=false, on_success=function() {
+        jQuery.ajax({
+            url:         `/api/v1/recommend-repository/${dataset_uuid}`,
+            type:        "GET",
+            accept:      "application/json",
+        }).done(function (data) {
+            show_message ("success", `<p>The recommended repository is ${JSON.stringify(data.repository)}.</p>`);
+        }).fail(function () {
+            if (notify) {
+                show_message ("failure", "<p>Failed to find the appropriate data repository.</p>");
+            }
+        });
+    });
+}
+
 function save_dataset (event, dataset_uuid, notify=true, on_success=jQuery.noop) {
     event.preventDefault();
     event.stopPropagation();

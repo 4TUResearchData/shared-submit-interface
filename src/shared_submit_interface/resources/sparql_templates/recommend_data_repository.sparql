@@ -1,0 +1,30 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT DISTINCT ?repository ?domain_name ?datatype ?affiliation_name
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?dataset     rdf:type                  ssi:Dataset .
+    ?dataset     ssi:account               ?account .
+    ?dataset     ssi:affiliation/ssi:name  ?affiliation_name .
+    ?dataset     ssi:domain/ssi:name       ?domain_name .
+    ?dataset     ssi:datatype/ssi:name     ?datatype .
+
+    {# The logic is:
+     # 1. Data by a 4TU.ResearchData partner should be published in 4TU.
+     # 2. Data in the Physical and Technical Sciences should be published in 4TU.
+     # 3. Software and netCDF data should be published in 4TU.
+     # 4. Any other case should publish with DANS.
+     #}
+    BIND(IF((?affiliation_name IN ("Wageningen University & Research (WUR)"^^xsd:string,
+                                   "University of Twente"^^xsd:string,
+                                   "Delft University of Technology"^^xsd:string,
+                                   "Eindhoven University of Technology"^^xsd:string) ||
+             ?domain_name = "Physical and Technical Sciences"^^xsd:string ||
+             ?datatype != "Other"^^xsd:string),
+            "4tu", "dans") AS ?repository)
+  }
+
+  FILTER (?dataset = <dataset:{{dataset_uuid}}>)
+  FILTER (?account = <account:{{account_uuid}}>)
+}
+{% endblock %}

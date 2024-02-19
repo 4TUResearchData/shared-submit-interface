@@ -44,6 +44,7 @@ class WebUserInterfaceServer:
             R("/api/v1/repositories",             self.api_v1_repositories),
             R("/api/v1/datasets",                 self.api_v1_datasets),
             R("/api/v1/dataset/<dataset_uuid>",   self.api_v1_dataset),
+            R("/api/v1/recommend-repository/<dataset_uuid>", self.api_v1_recommend_data_repository),
             R("/draft-dataset",                   self.ui_draft_dataset),
             R("/login",                           self.ui_login),
             R("/logout",                          self.ui_logout),
@@ -527,6 +528,26 @@ class WebUserInterfaceServer:
             return self.error_500 ()
 
         return self.respond_204 ()
+
+    def api_v1_recommend_data_repository (self, request, dataset_uuid):
+        """Implements /v1/recommend-repository/<dataset_uuid>."""
+
+        account_uuid = self.default_authenticated_error_handling (request, "GET", "application/json")
+        if isinstance (account_uuid, Response):
+            return account_uuid
+
+        if not validator.is_valid_uuid (dataset_uuid):
+            return self.error_403 (request)
+
+        try:
+            repository = self.db.recommend_data_repository (account_uuid = account_uuid,
+                                                            dataset_uuid = dataset_uuid)
+            if repository:
+                return self.response (json.dumps({ "repository": repository }))
+
+            return self.error_500 ()
+        except IndexError:
+            return self.error_404 (request)
 
     def ui_home (self, request):  # pylint: disable=unused-argument
         """Implements /."""
