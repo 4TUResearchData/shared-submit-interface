@@ -25,6 +25,7 @@ EXTRA_RESOURCES =                                                               
     shared_submit_interface/resources/sparql_templates/account_sessions.sparql   \
     shared_submit_interface/resources/sparql_templates/accounts.sparql           \
     shared_submit_interface/resources/sparql_templates/datasets.sparql           \
+    shared_submit_interface/resources/sparql_templates/datatypes.sparql          \
     shared_submit_interface/resources/sparql_templates/delete_inactive_session_by_uuid.sparql \
     shared_submit_interface/resources/sparql_templates/delete_session.sparql     \
     shared_submit_interface/resources/sparql_templates/delete_session_by_uuid.sparql \

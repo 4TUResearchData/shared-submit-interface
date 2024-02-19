@@ -1,6 +1,6 @@
 {% extends "prefixes.sparql" %}
 {% block query %}
-SELECT DISTINCT ?uuid ?account ?title ?affiliation_uuid ?affiliation_name ?email ?is_editable ?is_transfered ?created_date ?modified_date ?domain_uuid
+SELECT DISTINCT ?uuid ?account ?title ?affiliation_uuid ?affiliation_name ?email ?is_editable ?is_transfered ?created_date ?modified_date ?domain_uuid ?datatype_uuid
 WHERE {
   GRAPH <{{state_graph}}> {
     ?dataset            rdf:type          ssi:Dataset .
@@ -13,6 +13,7 @@ WHERE {
       BIND(STRAFTER(STR(?affiliation), "organization:") AS ?affiliation_uuid)
     }
     OPTIONAL { ?dataset ssi:domain        ?domain . }
+    OPTIONAL { ?dataset ssi:datatype      ?datatype . }
     OPTIONAL { ?dataset ssi:email         ?email . }
     OPTIONAL { ?dataset ssi:is_editable   ?is_editable . }
     OPTIONAL { ?dataset ssi:is_transfered ?is_transfered . }
@@ -21,6 +22,7 @@ WHERE {
 
     BIND (STRAFTER(STR(?dataset), "dataset:") AS ?uuid)
     BIND (STRAFTER(STR(?domain), "domain:") AS ?domain_uuid)
+    BIND (STRAFTER(STR(?datatype), "datatype:") AS ?datatype_uuid)
   }
   {%- if uuid is not none %}
   FILTER (?dataset = <dataset:{{uuid}}>)

@@ -513,6 +513,7 @@ class WebUserInterfaceServer:
             "title":         validator.string_value (record, "title", 0, 255, False, error_list=errors),
             "affiliation":   validator.uuid_value (record, "affiliation", False, error_list=errors),
             "domain":        validator.uuid_value (record, "domain", False, error_list=errors),
+            "datatype":      validator.uuid_value (record, "datatype", False, error_list=errors),
             "description":   validator.string_value (record, "description", 0, 4096, False, error_list=errors),
             "email":         validator.string_value (record, "email", 0, 512, False, error_list=errors),
             "is_editable":   dataset["is_editable"],
@@ -647,9 +648,11 @@ class WebUserInterfaceServer:
             try:
                 dataset = self.db.datasets(dataset_uuid=dataset_uuid)[0]
                 research_domains = self.db.research_domains ()
+                datatypes = self.db.datatypes ()
                 return self.__render_template (request, "edit-dataset.html",
                                                dataset          = dataset,
-                                               research_domains = research_domains)
+                                               research_domains = research_domains,
+                                               datatypes        = datatypes)
             except IndexError:
                 self.log.error ("Could not find draft dataset.")
                 return self.error_403 (request)

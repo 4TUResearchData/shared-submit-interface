@@ -17,6 +17,7 @@ function gather_form_data () {
         "title":          or_null(jQuery("#title").val()),
         "affiliation":    or_null(jQuery("#affiliation-uuid").val()),
         "domain":         or_null(jQuery("#research-domain").val()),
+        "datatype":       or_null(jQuery("#type-of-data").val()),
         "email":          or_null(jQuery("#email").val()),
         //"description":    or_null(jQuery("#description .ql-editor").html()),
     };

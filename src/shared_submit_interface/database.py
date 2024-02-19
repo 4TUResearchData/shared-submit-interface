@@ -292,6 +292,17 @@ class SparqlInterface:
             rdf.add (graph, uri, rdf.SSI["url"], domain["url"], XSD.string)
             rdf.add (graph, uri, rdf.SSI["status"], domain["status"], XSD.string)
 
+
+        data_types = [{ "name": "Software under version control with Git", "order": 1 },
+                      { "name": "netCDF for use with OPeNDAP", "order": 2 },
+                      { "name": "Other", "order": 3 }]
+
+        for datatype in data_types:
+            uri = URIRef(rdf.uuid_to_uri (str(uuid.uuid4()), "datatype"))
+            rdf.add (graph, uri, RDF.type, rdf.SSI["Datatype"], "uri")
+            rdf.add (graph, uri, rdf.SSI["name"], datatype["name"], XSD.string)
+            rdf.add (graph, uri, rdf.SSI["order"], datatype["order"], XSD.integer)
+
         organizations = self.read_organizations_from_surf_idps_metadata ()
         for organization in organizations:
             uri = URIRef(rdf.uuid_to_uri (organization["uuid"], "organization"))
@@ -410,6 +421,14 @@ class SparqlInterface:
         query = self.__query_from_template ("research_domains")
         return self.__run_query (query)
 
+    # DATA TYPES
+    # -------------------------------------------------------------------------
+
+    def datatypes (self):
+        """Returns types of data."""
+        query = self.__query_from_template ("datatypes")
+        return self.__run_query (query)
+
     # ORGANIZATIONS
     # -------------------------------------------------------------------------
 
@@ -487,7 +506,7 @@ class SparqlInterface:
 
     def update_dataset (self, account_uuid, dataset_uuid, title, affiliation,
                         description, email, is_editable, is_transfered,
-                        domain=None):
+                        domain=None, datatype=None):
         """Updates the metadata of a dataset."""
 
         current_epoch = int(datetime.now().timestamp())
@@ -498,6 +517,7 @@ class SparqlInterface:
             "description": rdf.escape_string_value (description),
             "email": rdf.escape_string_value (email),
             "domain": rdf.uuid_to_uri (domain, "domain"),
+            "datatype": rdf.uuid_to_uri (datatype, "datatype"),
             "is_editable": rdf.escape_boolean_value (is_editable),
             "is_transfered": rdf.escape_boolean_value (is_transfered),
             "modified_date": current_epoch

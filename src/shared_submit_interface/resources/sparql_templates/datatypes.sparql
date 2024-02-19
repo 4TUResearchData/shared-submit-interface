@@ -1,0 +1,14 @@
+{% extends "prefixes.sparql" %}
+{% block query %}
+SELECT DISTINCT ?uuid ?name
+WHERE {
+  GRAPH <{{state_graph}}> {
+    ?datatype   rdf:type   ssi:Datatype .
+    ?datatype   ssi:name   ?name .
+    ?datatype   ssi:order  ?order .
+  }
+
+  BIND(STRAFTER(STR(?datatype), "datatype:") AS ?uuid)
+}
+ORDER BY ASC(?order)
+{% endblock %}

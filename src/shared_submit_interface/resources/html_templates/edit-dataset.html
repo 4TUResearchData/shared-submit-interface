@@ -46,9 +46,9 @@
 <div class="options-wrapper">
   <select id="type-of-data">
     <option value="" disabled selected>Select which type of data</option>
-    <option value="vcs-software">Software under version control with Git</option>
-    <option value="netcdf">netCDF for use with OPeNDAP</option>
-    <option value="other">Other</option>
+    {%- for datatype in datatypes %}
+    <option value="{{datatype.uuid}}" {% if dataset.datatype_uuid == datatype.uuid %}selected{% endif %}>{{datatype.name}}</option>
+    {%- endfor %}
   </select>
 </div>
 

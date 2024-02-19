@@ -5,6 +5,7 @@ DELETE {
     ?dataset           ssi:title                ?title .
     ?dataset           ssi:affiliation          ?affiliation .
     ?dataset           ssi:domain               ?domain .
+    ?dataset           ssi:datatype             ?datatype .
     ?dataset           ssi:description          ?description .
     ?dataset           ssi:is_editable          ?is_editable .
     ?dataset           ssi:is_transfered        ?is_transfered .
@@ -20,6 +21,8 @@ INSERT {
     ?dataset           ssi:affiliation          <{{affiliation}}> .
     {%- endif%}{% if domain is not none %}
     ?dataset           ssi:domain               <{{domain}}> .
+    {%- endif%}{% if datatype is not none %}
+    ?dataset           ssi:datatype             <{{datatype}}> .
     {%- endif%}{% if description is not none %}
     ?dataset           ssi:description          {{description | safe}} .
     {%- endif%}{% if is_editable is not none %}
@@ -38,6 +41,7 @@ WHERE {
     OPTIONAL { ?dataset ssi:title               ?title . }
     OPTIONAL { ?dataset ssi:affiliation         ?affiliation . }
     OPTIONAL { ?dataset ssi:domain              ?domain . }
+    OPTIONAL { ?dataset ssi:datatype            ?datatype . }
     OPTIONAL { ?dataset ssi:description         ?description . }
     OPTIONAL { ?dataset ssi:is_transfered       ?is_transfered . }
     OPTIONAL { ?dataset ssi:email               ?email . }
