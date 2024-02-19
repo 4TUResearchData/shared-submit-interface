@@ -1,1 +1,41 @@
 \chapter{Introduction}
+
+\section{Running the \t{shared-submit-interface}.}
+
+\subsection{Configuring the database back-end}
+
+The \t{shared-submit-interface} can be used with a SPARQL 1.1
+compliant database.  The authors tested with both Virtuoso Open Source
+and BerkeleyDB.
+
+\subsubsection{Configuring \t{berkeleydb} as back-end}
+
+The simplest setup can be achieved by leveraging RDFLib's
+stores.  One such option is the \t{berkeleydb} back-end. To use this option,
+ensure that both the \t{berkeleydb} system libraries and the \t{berkeleydb}
+Python package are installed.
+
+To use the \t{berkeleydb} back-end, configure the \t{rdf-store} as following:
+\begin{lstlisting}[language=xml]
+<rdf-store>
+  <sparql-uri>(@*\Highlight{bdb://}*@)/path/to/empty/directory</sparql-uri>
+  <state-graph>ssi://default</state-graph>
+</rdf-store>
+\end{lstlisting}
+
+\subsubsection{Configuring \t{virtuoso} as back-end}
+
+A higher performant and more scalable setup than \t{berkeleydb} can be
+achieved by using Virtuoso Open Source.
+
+To use the \t{virtuoso} back-end, configure the \t{rdf-store} as following:
+\begin{lstlisting}[language=xml]
+<rdf-store>
+  <sparql-uri>(@*\Highlight{https://adress-of-endpoint:8890/sparql}*@)</sparql-uri>
+  <state-graph>ssi://default</state-graph>
+</rdf-store>
+\end{lstlisting}
+
+This assumes the \t{virtuoso} endpoint is available at
+\t{https://address-of-endpoint:8890/sparql}.
+
