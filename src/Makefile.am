@@ -33,6 +33,7 @@ EXTRA_RESOURCES =                                                               
     shared_submit_interface/resources/sparql_templates/is_initialized.sparql     \
     shared_submit_interface/resources/sparql_templates/organizations.sparql      \
     shared_submit_interface/resources/sparql_templates/prefixes.sparql           \
+    shared_submit_interface/resources/sparql_templates/recommend_data_repository.sparql \
     shared_submit_interface/resources/sparql_templates/research_domains.sparql   \
     shared_submit_interface/resources/sparql_templates/update_dataset.sparql     \
     shared_submit_interface/resources/sparql_templates/update_session.sparql     \
