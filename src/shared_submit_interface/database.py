@@ -486,7 +486,8 @@ class SparqlInterface:
         return rdf.uri_to_uuid (uri)
 
     def update_dataset (self, account_uuid, dataset_uuid, title, affiliation,
-                        description, email, is_editable, is_transfered):
+                        description, email, is_editable, is_transfered,
+                        domain=None):
         """Updates the metadata of a dataset."""
 
         current_epoch = int(datetime.now().timestamp())
@@ -496,6 +497,7 @@ class SparqlInterface:
             "affiliation": rdf.uuid_to_uri (affiliation, "organization"),
             "description": rdf.escape_string_value (description),
             "email": rdf.escape_string_value (email),
+            "domain": rdf.uuid_to_uri (domain, "domain"),
             "is_editable": rdf.escape_boolean_value (is_editable),
             "is_transfered": rdf.escape_boolean_value (is_transfered),
             "modified_date": current_epoch

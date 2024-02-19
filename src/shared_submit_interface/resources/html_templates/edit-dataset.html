@@ -37,7 +37,7 @@
   <select id="research-domain">
     <option value="" disabled selected>Select research domain</option>
     {%- for domain in research_domains %}
-    <option value="{{domain.uuid}}">{{domain.name}}</option>
+    <option value="{{domain.uuid}}" {% if dataset.domain_uuid == domain.uuid %}selected{% endif %}>{{domain.name}}</option>
     {%- endfor %}
   </select>
 </div>
