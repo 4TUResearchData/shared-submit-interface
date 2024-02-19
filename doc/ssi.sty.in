@@ -12,8 +12,8 @@
 \usepackage{fancyhdr}
 \setlength{\headheight}{30pt}
 \pagestyle{fancy}
-\fancyhead[RE]{\includegraphics[width=2cm]{figures/logo}}
-\fancyhead[LO]{\includegraphics[width=2cm]{figures/logo}}
+\fancyhead[RE]{}
+\fancyhead[LO]{}
 \fancypagestyle{plain}{\fancyhead{}}
 \addtolength{\topmargin}{-1cm}
 
