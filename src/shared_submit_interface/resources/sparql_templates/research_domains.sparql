@@ -6,5 +6,10 @@ WHERE {
     ?domain   rdf:type   ssi:ResearchDomain .
     ?domain   ssi:name   ?name .
     ?domain   ssi:url    ?url .
+    ?domain   ssi:status ?status .
+  }
+
+  BIND(STRAFTER(STR(?domain), "domain:") AS ?uuid)
 }
+ORDER BY ASC(?status) DESC (?name)
 {% endblock %}
