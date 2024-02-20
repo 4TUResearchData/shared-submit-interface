@@ -39,3 +39,45 @@ To use the \t{virtuoso} back-end, configure the \t{rdf-store} as following:
 This assumes the \t{virtuoso} endpoint is available at
 \t{https://address-of-endpoint:8890/sparql}.
 
+\section{Application flow}
+
+The \t{shared-submit-interface} implements a three-step process to route a
+user to a data repository.
+
+\subsection{Step 1: Authenticate using SURF}
+
+The first of these three steps is logging in using SURF Research Access
+Management (SRAM).  By doing so, the user's authenticity can be guaranteed
+when relaying information to the data repositories.
+
+\subsection{Step 2: Gathering metadata}
+
+The second step involves entering metadata that is relevant to determining
+the data repository, and additionally, for the user to identify the dataset
+once it's transfered to a data repository.
+
+Uploading data has been left out of the scope, because it would complicate
+the setup, and handling of sensitive data would be a disaster.
+
+\subsection{Step 3: Transfering metadata to the designated repository}
+
+The final step in the process transfers the metadata to the designated
+data repository.  The \t{shared-submit-interface} sends the following
+data using a HTTP PUT request that the data repository needs to
+implement:
+
+Example content:
+\begin{lstlisting}[language=json]
+  {
+    "psk": "--- The configured pre-shared key for this endpoint ---"
+    "email": "--- E-mail address provided by SURF. ---",
+    "title": "Example title",
+    "domain": "Physical and Technical Sciences",
+    "affiliation": "Delft University of Technology",
+    "datatype": "software"
+  }
+\end{lstlisting}
+
+A succesful execution is assumed if the data repository responds with
+a HTTP 302 (redirect).  This redirect is expected to lead to the
+submission form of the data repository.
