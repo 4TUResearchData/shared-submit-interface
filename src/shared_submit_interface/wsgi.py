@@ -540,6 +540,22 @@ class WebUserInterfaceServer:
             return self.error_403 (request)
 
         try:
+            dataset = self.db.datasets (account_uuid = account_uuid,
+                                        dataset_uuid = dataset_uuid)[0]
+
+            if (value_or_none (dataset, "affiliation_uuid") is None):
+                return self.error_400 (request,
+                                       "Please provide your affiliation.",
+                                       "NeedMoreData")
+            if value_or_none (dataset, "domain_uuid") is None:
+                return self.error_400 (request,
+                                       "Please provide your research domain.",
+                                       "NeedMoreData")
+            if value_or_none (dataset, "datatype_uuid") is None:
+                return self.error_400 (request,
+                                       "Please provide the type of your data.",
+                                       "NeedMoreData")
+
             repository = self.db.recommend_data_repository (account_uuid = account_uuid,
                                                             dataset_uuid = dataset_uuid)
             if repository:
