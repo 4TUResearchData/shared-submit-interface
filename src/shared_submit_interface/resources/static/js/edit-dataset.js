@@ -36,10 +36,9 @@ function transfer_dataset (event, dataset_uuid) {
             accept:      "application/json",
         }).done(function (data) {
             show_message ("success", `<p>The recommended repository is ${JSON.stringify(data.repository)}.</p>`);
-        }).fail(function () {
-            if (notify) {
-                show_message ("failure", "<p>Failed to find the appropriate data repository.</p>");
-            }
+        }).fail(function (response, text_status, error_code) {
+            let result = JSON.parse(response.responseText);
+            show_message ("failure", `<p>${result.message}</p>`);
         });
     });
 }

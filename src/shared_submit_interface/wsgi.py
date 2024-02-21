@@ -3,6 +3,7 @@
 import json
 import os
 import logging
+import requests
 from werkzeug.utils import redirect
 from werkzeug.wrappers import Request, Response
 from werkzeug.routing import Map, Rule
@@ -50,6 +51,7 @@ class WebUserInterfaceServer:
             R("/logout",                          self.ui_logout),
             R("/my-datasets",                     self.ui_my_datasets),
             R("/draft-dataset/<dataset_uuid>",    self.ui_draft_dataset),
+            R("/transfer-dataset/<dataset_uuid>", self.transfer_dataset),
             R("/robots.txt",                      self.robots_txt),
         ])
         self.allow_crawlers   = False
@@ -529,7 +531,7 @@ class WebUserInterfaceServer:
 
         return self.respond_204 ()
 
-    def api_v1_recommend_data_repository (self, request, dataset_uuid):
+    def api_v1_recommend_data_repository (self, request, dataset_uuid, transfer=False):
         """Implements /v1/recommend-repository/<dataset_uuid>."""
 
         account_uuid = self.default_authenticated_error_handling (request, "GET", "application/json")
@@ -558,10 +560,63 @@ class WebUserInterfaceServer:
 
             repository = self.db.recommend_data_repository (account_uuid = account_uuid,
                                                             dataset_uuid = dataset_uuid)
-            if repository:
-                return self.response (json.dumps({ "repository": repository }))
+            if not repository:
+                self.log.error ("No repository recommendation possible for %s", dataset_uuid)
+                self.error_500 ()
 
-            return self.error_500 ()
+            if transfer:
+                try:
+                    settings = self.repositories[repository]
+                    psk = settings["psk"]
+                    base_url = settings["base-url"]
+                    endpoint = settings["endpoint"]
+                    record = {
+                        "psk":    psk,
+                        "email":  dataset["account_email"],
+                        "title":  dataset["title"],
+                        "domain": dataset["domain_name"],
+                        "affiliation": "",
+                        "datatype": ""
+                    }
+                    headers = {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    }
+                    response = requests.put (f"{base_url}{endpoint}",
+                                             headers = headers,
+                                             json = record,
+                                             timeout = 10,
+                                             allow_redirects = False)
+
+                    if response.status_code == 302:
+                        location = response.headers.get("location")
+                        if location is None:
+                            self.log.error ("No redirect location found for '%s'", dataset_uuid)
+                            return self.error_500 ()
+
+                        set_cookie = response.headers.get("set-cookie")
+                        if set_cookie is None:
+                            self.log.error ("No session cookie found for '%s'", dataset_uuid)
+                            return self.error_500 ()
+
+                        cookie = set_cookie.split(";")[0].split("=")
+                        if len(cookie) != 2:
+                            self.log.error ("Unexpected parsing of cookie.")
+                            return self.error_500 ()
+
+                        repository_redirect = redirect (f"{base_url}{location}", code=302)
+                        repository_redirect.set_cookie (key=cookie[0], value=cookie[1])
+                        return repository_redirect
+
+                    self.log.error ("The data repository '%s' returned %s.",
+                                    repository, response.status_code)
+                    return self.error_500 ()
+                except KeyError as error:
+                    self.log.error ("Missing repository configuration for '%s'", repository)
+                    return self.error_500 ()
+
+            return self.response (json.dumps({ "repository": repository }))
+
         except IndexError:
             return self.error_404 (request)
 
@@ -696,5 +751,6 @@ class WebUserInterfaceServer:
 
         return self.error_405 ("GET")
 
-
-
+    def transfer_dataset (self, request, dataset_uuid):
+        """Implements /transfer-dataset/<dataset_uuid>."""
+        return self.api_v1_recommend_data_repository (request, dataset_uuid, transfer=True)
