@@ -137,21 +137,24 @@ def read_pre_shared_keys_for_repositories (server, xml_root, logger):
 
     for repository in repositories:
         name = repository.attrib.get("name")
-        api_url = repository.attrib.get("endpoint")
+        api_base_url = repository.attrib.get("base-url")
+        api_endpoint = repository.attrib.get("endpoint")
         pre_shared_key = repository.text
         register_repository = True
         if name is None or name == "":
             logger.error("The 'name' attribute is required for repository '%s'.", name)
             register_repository = False
-        if api_url is None or api_url == "":
+        if (api_base_url is None or api_base_url == "" or
+            api_endpoint is None or api_endpoint == ""):
             logger.error("The 'endpoint' attribute is required for repository '%s'.", name)
             register_repository = False
         if pre_shared_key is None or pre_shared_key == "":
             logger.error("A pre-shared key is needed for repository '%s'.", name)
             register_repository = False
         if register_repository:
-            pre_shared_key = pre_shared_key.strip(" \t\n\r").replace(" ", "").replace("\n", "").replace("\r", "").replace("\t", "")
-            server.repositories[name] = { "psk": pre_shared_key, "endpoint": api_url }
+            pre_shared_key = pre_shared_key.replace(" ", "").replace("\n", "").replace("\r", "").replace("\t", "")
+            server.repositories[name] = { "psk": pre_shared_key, "base-url": api_base_url, "endpoint": api_endpoint }
+            logger.info ("Added '%s' repository.", name)
 
     return None
 
