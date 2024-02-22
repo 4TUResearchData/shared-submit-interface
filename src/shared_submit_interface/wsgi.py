@@ -698,7 +698,7 @@ class WebUserInterfaceServer:
 
             self.log.access ("Created session %s for account %s.", session_uuid, account_uuid) #  pylint: disable=no-member
 
-            response = redirect ("/my-datasets", code=302)
+            response = redirect ("/draft-dataset", code=302)
             response.set_cookie (key=self.cookie_key, value=token, secure=self.in_production)
             return response
 
