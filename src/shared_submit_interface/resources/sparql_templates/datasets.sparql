@@ -20,8 +20,8 @@ WHERE {
       ?domain  ssi:name          ?domain_name .
     }
     OPTIONAL { ?dataset ssi:datatype      ?datatype . }
-    OPTIONAL { ?dataset ssi:is_editable   ?is_editable . }
-    OPTIONAL { ?dataset ssi:is_transfered ?is_transfered . }
+    ?dataset ssi:is_editable   ?is_editable .
+    ?dataset ssi:is_transfered ?is_transfered .
     OPTIONAL { ?dataset ssi:created_date  ?created_date . }
     OPTIONAL { ?dataset ssi:modified_date ?modified_date . }
 

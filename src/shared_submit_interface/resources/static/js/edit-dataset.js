@@ -25,17 +25,19 @@ function gather_form_data () {
     return form_data;
 }
 
-function transfer_dataset (event, dataset_uuid) {
+function recommend_dataset (event, dataset_uuid) {
     event.preventDefault();
     event.stopPropagation();
-    console.log ("Executing 'transfer_dataset'.");
     save_dataset (event, dataset_uuid, notify=false, on_success=function() {
+        jQuery(".transfer-button").remove();
         jQuery.ajax({
             url:         `/api/v1/recommend-repository/${dataset_uuid}`,
             type:        "GET",
             accept:      "application/json",
         }).done(function (data) {
-            show_message ("success", `<p>The recommended repository is ${JSON.stringify(data.repository)}.</p>`);
+            let repository_name = data.repository.toUpperCase();
+            show_message ("success", `<p>The recommended repository is ${JSON.stringify(repository_name)}.</p>`);
+            jQuery("ul.action-buttons").append(`<li class="transfer-button"><a href="/transfer-dataset/${dataset_uuid}" id="transfer">Continue at ${repository_name}</a></li>`);
         }).fail(function (response, text_status, error_code) {
             let result = JSON.parse(response.responseText);
             show_message ("failure", `<p>${result.message}</p>`);
@@ -74,7 +76,7 @@ function set_organization (event, dataset_uuid) {
     jQuery("#affiliation").val(name);
     jQuery("#affiliation-ac").remove();
     jQuery("#affiliation").removeClass("input-for-ac");
-    jQuery("#email").focus();
+    jQuery(".transfer-button").remove();
 }
 function autocomplete_organization (event, dataset_uuid) {
     if (event !== null) {
@@ -117,6 +119,6 @@ function autocomplete_organization (event, dataset_uuid) {
 
 function activate (dataset_uuid) {
     jQuery("#save").on("click", function (event) { save_dataset (event, dataset_uuid); });
-    jQuery("#transfer").on("click", function (event) { transfer_dataset (event, dataset_uuid); });
+    jQuery("#recommend").on("click", function (event) { recommend_dataset (event, dataset_uuid); });
     jQuery("#affiliation").on("input", function (event) { autocomplete_organization (event, dataset_uuid); });
 }

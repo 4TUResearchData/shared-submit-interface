@@ -2,9 +2,6 @@
 {% block headers %}
 <link href="/static/css/main.css" rel="stylesheet">
 <link href="/static/css/form.css" rel="stylesheet">
-<style>
-  #datasets-table tbody tr td:last-child { border: solid 1px #ff0000; text-align: right; }
-</style>
 {% endblock %}
 {% block steps %}
 <ul id="steps" class="action-buttons">
@@ -29,7 +26,7 @@
   <tbody>
     {% for dataset in datasets %}
     <tr>
-      <td><a href="/draft-dataset/{{dataset.uuid}}">{{dataset.title | default("Edit")}}</a></td>
+      <td>{% if dataset.is_editable %}<a href="/draft-dataset/{{dataset.uuid}}">{% endif %}{{dataset.title | default("Untitled item")}}{% if dataset.is_editable %}</a>{% endif %}</td>
       <td>{% if dataset.is_transfered %}transfered{% else %}draft{% endif %}</td>
       <td>{{dataset.modified_date}}</td>
     </tr>

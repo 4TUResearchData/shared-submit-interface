@@ -606,13 +606,26 @@ class WebUserInterfaceServer:
 
                         repository_redirect = redirect (f"{base_url}{location}", code=302)
                         repository_redirect.set_cookie (key=cookie[0], value=cookie[1])
-                        return repository_redirect
+
+                        if self.db.update_dataset (account_uuid=account_uuid,
+                                                   dataset_uuid=dataset_uuid,
+                                                   email=dataset["account_email"],
+                                                   title=dataset["title"],
+                                                   affiliation=dataset["affiliation_uuid"],
+                                                   description=None,
+                                                   is_editable=False,
+                                                   is_transfered=True,
+                                                   domain=dataset["domain_uuid"],
+                                                   datatype=dataset["datatype_uuid"]):
+                            return repository_redirect
+
+                        return self.error_500()
 
                     self.log.error ("The data repository '%s' returned %s.",
                                     repository, response.status_code)
                     return self.error_500 ()
                 except KeyError as error:
-                    self.log.error ("Missing repository configuration for '%s'", repository)
+                    self.log.error ("Missing repository configuration for '%s' (%s)", repository, error)
                     return self.error_500 ()
 
             return self.response (json.dumps({ "repository": repository }))
