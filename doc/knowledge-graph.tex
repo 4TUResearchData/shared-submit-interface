@@ -1,0 +1,163 @@
+\chapter{Knowledge graph}
+
+  The \code{shared-submit-interface} processes its information using the
+  Resource Description Framework \citep{lassila-99-rdf}.  This chapter
+  describes the parts that make up the data model of this program.
+
+
+\section{Use of vocalubaries}
+
+  Throughout this chapter, abbreviated references to ontologies are used.
+  Table \ref{table:vocabularies} lists these abbreviations.
+
+  \hypersetup{urlcolor=black}
+  \begin{table}[H]
+    \begin{tabularx}{\textwidth}{*{1}{!{\VRule[-1pt]}l}!{\VRule[-1pt]}X}
+      \headrow
+      \b{Abbreviation} & \b{Ontology URI}\\
+      \evenrow
+      \t{ssi}          & \dhref{https://ontologies.data.4tu.nl/ssi/\ssiversion/}\\
+      \oddrow
+      \t{rdf}          & \dhref{http://www.w3.org/1999/02/22-rdf-syntax-ns\#}\\
+      \evenrow
+      \t{rdfs}         & \dhref{http://www.w3.org/2000/01/rdf-schema\#}\\
+      \oddrow
+      \t{xsd}          & \dhref{http://www.w3.org/2001/XMLSchema\#}\\
+    \end{tabularx}
+    \caption{\small Lookup table for vocabulary URIs and their abbreviations.}
+    \label{table:vocabularies}
+  \end{table}
+  \hypersetup{urlcolor=LinkGray}
+
+\section{Notational shortcuts}
+
+  In addition to abbreviating ontologies with their prefix we use another
+  notational shortcut.  To effectively communicate the structure of the RDF
+  graph used by the \t{shared-submit-interface} we introduce a couple of
+  shorthand notations.
+
+\subsection{Notation for typed triples}
+
+  When the \code{object} in a triple is \i{typed}, we introduce the shorthand
+  to only show the type, rather than the actual value of the \code{object}.
+  Figure \ref{fig:typed-notation} displays this for URIs, and figure
+  \ref{fig:typed-literals-notation} displays this for literals.
+
+  \includefigure{typed-notation}{Shorthand notation for triples with an
+    \code{rdf:type} which features a hollow predicate arrow and a colored
+    type specifier with rounded corners.}
+
+  Literals are depicted by rectangles (with sharp edges) in contrast to URIs
+  which are depicted as rectangles with rounded edges.
+
+  \includefigure{typed-literals-notation}{Shorthand notation for triples with
+    a literal, which features a hollow predicate arrow and a colored
+    rectangular type specifier.}
+
+  When the subject of a triple is the shorthand type, assume the subject is not
+  the type itself but the subject which has that type.
+
+\subsection{Notation for \code{rdf:List}}
+
+  To preserve the order in which lists were formed, the data model makes use
+  of \code{rdf:List} with numeric indexes.  This pattern will be abbreviated
+  in the remainder of the figures as displayed in figure
+  \ref{fig:rdf-list-abbrev}.
+
+  \includefigure{rdf-list-abbrev}{Shorthand notation for \code{rdf:List}
+    with numeric indexes, which features a hollow double-arrow.  Lists have
+    arbitrary lengths, and the numeric indexes use 1-based indexing.}
+
+  The hollow double-arrow depicts the use of an \code{rdf:List} with numeric
+  indexes.
+
+\section{Concepts}
+
+\subsection{Dataset}
+
+  A \t{ssi:Dataset} describes a bundle of files sharing a common set of
+  metadata.  The information captured by the \t{shared-submit-interface}
+  contains only necessary information to determine where the data should
+  be deposited. Therefore, the \t{ssi:Dataset} is not equivalent to
+  \t{dc:Dataset}.
+
+  \hypersetup{urlcolor=black}
+  \begin{table}[H]
+    \begin{tabularx}{\textwidth}{*{1}{!{\VRule[-1pt]}l}!{\VRule[-1pt]}X}
+      \headrow
+      \b{Property} & \b{Description}\\
+      \evenrow
+      \t{ssi}          & \dhref{https://ontologies.data.4tu.nl/ssi/\ssiversion/}\\
+      \oddrow
+      \t{rdf}          & \dhref{http://www.w3.org/1999/02/22-rdf-syntax-ns\#}\\
+      \evenrow
+      \t{rdfs}         & \dhref{http://www.w3.org/2000/01/rdf-schema\#}\\
+      \oddrow
+      \t{xsd}          & \dhref{http://www.w3.org/2001/XMLSchema\#}\\
+    \end{tabularx}
+    \caption{\small The properties of a \t{ssi:Dataset}.}
+    \label{table:dataset-vocab}
+  \end{table}
+  \hypersetup{urlcolor=LinkGray}
+
+\subsection{ResearchDomain}
+
+  \hypersetup{urlcolor=black}
+  \begin{table}[H]
+    \begin{tabularx}{\textwidth}{*{1}{!{\VRule[-1pt]}l}!{\VRule[-1pt]}X}
+      \headrow
+      \b{Property}     & \b{Description}\\
+      \evenrow
+      \t{ssi:uuid}     & Internal identifier for the \t{ssi:ResearchDomain}.\\
+      \oddrow
+      \t{ssi:name}     & Name of the \t{ssi:ResearchDomain}.\\
+      \evenrow
+      \t{ssi:url}      & Link to the destination archive for the \t{ssi:ResearchDomain}\\
+    \end{tabularx}
+    \caption{\small The properties of a \t{ssi:Organization}.}
+    \label{table:research-domain-vocab}
+  \end{table}
+  \hypersetup{urlcolor=LinkGray}
+
+\subsubsection{Pre-defined instances of \t{ssi:ResearchDomain}}
+
+  The \code{-{}-initialize} argument will create the following instances
+  of \t{ssi:ResearchDomain}s.
+
+  \hypersetup{urlcolor=black}
+  \begin{table}[H]
+    \begin{tabularx}{\textwidth}{*{1}{!{\VRule[-1pt]}l}!{\VRule[-1pt]}X}
+      \headrow
+      \b{Name} & \b{URL}\\
+      \evenrow
+      Social Sciences and Humanities & \dhref{https://ssh.datastations.nl/}\\
+      \oddrow
+      Archaeology      & \dhref{https://archaeology.datastations.nl/}\\
+      \evenrow
+      Life Sciences    & \dhref{https://lifesciences.datastations.nl/}\\
+      \oddrow
+      Physical and Technical Sciences & \dhref{https://data.4tu.nl/}\\
+    \end{tabularx}
+    \caption{\small The pre-defined instances of a \t{ssi:ResearchDomain}.}
+    \label{table:research-domains}
+  \end{table}
+  \hypersetup{urlcolor=LinkGray}
+
+\subsection{Organization}
+
+  \hypersetup{urlcolor=black}
+  \begin{table}[H]
+    \begin{tabularx}{\textwidth}{*{1}{!{\VRule[-1pt]}l}!{\VRule[-1pt]}X}
+      \headrow
+      \b{Property}     & \b{Description}\\
+      \evenrow
+      \t{ssi:uuid}     & Internal identifier for the \t{ssi:Organization}.\\
+      \oddrow
+      \t{ssi:name}     & Name of the \t{ssi:Organization}.\\
+      \evenrow
+      \t{ssi:url}      & Link to the website of the \t{ssi:Organization}\\
+    \end{tabularx}
+    \caption{\small The properties of a \t{ssi:Organization}.}
+    \label{table:organization-vocab}
+  \end{table}
+  \hypersetup{urlcolor=LinkGray}
