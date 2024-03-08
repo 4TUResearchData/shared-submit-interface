@@ -47,6 +47,8 @@ class WebUserInterfaceServer:
             R("/api/v1/dataset/<dataset_uuid>",   self.api_v1_dataset),
             R("/api/v1/recommend-repository/<dataset_uuid>", self.api_v1_recommend_data_repository),
             R("/draft-dataset",                   self.ui_draft_dataset),
+            R("/saml/metadata",                   self.saml_metadata),
+            R("/saml/login",                      self.ui_login),
             R("/login",                           self.ui_login),
             R("/logout",                          self.ui_logout),
             R("/my-datasets",                     self.ui_my_datasets),
