@@ -387,6 +387,21 @@ def read_configuration_file (config, server, config_file, logger, config_files):
         config["use_reloader"]  = config_value (xml_root, "live-reload", use_reloader)
         config["use_debugger"]  = config_value (xml_root, "debug-mode", use_debugger)
 
+        cache_root = xml_root.find ("cache-root")
+        if cache_root is not None:
+            server.db.cache.storage = cache_root.text
+            try:
+                clear_on_start = cache_root.attrib.get("clear-on-start")
+                config["clear-cache-on-start"] = bool(int(clear_on_start))
+            except ValueError:
+                logger.warning ("Invalid value for the 'clear-on-start' attribute in 'cache-root'.")
+                logger.warning ("Will not clear cache on start; Use '1' to enable, or '0' to disable.")
+                config["clear-cache-on-start"] = False
+            except TypeError:
+                config["clear-cache-on-start"] = False
+        elif server.db.cache.storage is None:
+            server.db.cache.storage = f"{server.db.storage}/cache"
+
         production_mode = xml_root.find ("production")
         if production_mode is not None:
             server.in_production = bool(int(production_mode.text))
