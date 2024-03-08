@@ -545,7 +545,7 @@ class WebUserInterfaceServer:
             dataset = self.db.datasets (account_uuid = account_uuid,
                                         dataset_uuid = dataset_uuid)[0]
 
-            if (value_or_none (dataset, "affiliation_uuid") is None):
+            if value_or_none (dataset, "affiliation_uuid") is None:
                 return self.error_400 (request,
                                        "Please provide your affiliation.",
                                        "NeedMoreData")
