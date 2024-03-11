@@ -468,9 +468,6 @@ class WebUserInterfaceServer:
     def api_v1_organizations (self, request):
         """Implements /api/v1/organizations."""
 
-        if self.in_production:
-            return self.error_403 (request)
-
         if request.method in ("GET", "HEAD"):
             organizations = self.db.organizations ()
             return self.default_list_response (organizations, formatter.organization_record)
