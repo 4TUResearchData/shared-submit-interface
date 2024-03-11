@@ -417,8 +417,11 @@ def read_configuration_file (config, server, config_file, logger, config_files):
         server.allow_crawlers = read_boolean_value (xml_root, "allow-crawlers",
                                                     server.allow_crawlers, logger)
 
-        server.base_url   = config_value (xml_root, "base-url", server.base_url,
-                                          f"http://{config['address']}:{config['port']}")
+        base_url_fallback = f"http://{config['address']}:{config['port']}"
+        if server.base_url:
+            base_url_fallback = server.base_url
+
+        server.base_url = config_value (xml_root, "base-url", None, base_url_fallback)
 
         endpoint = config_value (xml_root, "rdf-store/sparql-uri")
         if endpoint:
