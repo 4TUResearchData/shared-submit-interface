@@ -457,6 +457,9 @@ class WebUserInterfaceServer:
     def api_v1_accounts (self, request):
         """Implements /api/v1/accounts."""
 
+        if self.in_production:
+            return self.error_403 (request)
+
         if request.method in ("GET", "HEAD"):
             accounts = self.db.accounts ()
             return self.default_list_response (accounts, formatter.account_record)
@@ -464,6 +467,9 @@ class WebUserInterfaceServer:
 
     def api_v1_organizations (self, request):
         """Implements /api/v1/organizations."""
+
+        if self.in_production:
+            return self.error_403 (request)
 
         if request.method in ("GET", "HEAD"):
             organizations = self.db.organizations ()
@@ -487,6 +493,9 @@ class WebUserInterfaceServer:
     def api_v1_repositories (self, request):
         """Implements /api/v1/repositories."""
 
+        if self.in_production:
+            return self.error_403 (request)
+
         if request.method in ("GET", "HEAD"):
             repositories = list(map(lambda name: { "name": name, **self.repositories[name] }, self.repositories.keys()))
             return self.default_list_response (repositories, formatter.repository_record)
@@ -495,6 +504,9 @@ class WebUserInterfaceServer:
 
     def api_v1_datasets (self, request):
         """Implements /api/v1/datasets"""
+
+        if self.in_production:
+            return self.error_403 (request)
 
         if request.method in ("GET", "HEAD"):
             datasets = self.db.datasets ()
