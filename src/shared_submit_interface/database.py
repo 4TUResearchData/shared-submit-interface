@@ -268,22 +268,30 @@ class SparqlInterface:
             return True
 
         graph = Graph ()
-        research_domains = [{ "name": "Social Sciences and Humanities",
-                              "url":  "https://ssh.datastations.nl/",
+        research_domains = [{ "name": "Science and technology",
+                              "url": "https://data.4tu.nl",
                               "status": "linked" },
-                            { "name": "Archaeology",
-                              "url":  "https://archaeology.datastations.nl/",
+                            { "name": "Life sciences, medicine and health care",
+                              "url": "https://lifesciences.datastations.nl/",
                               "status": "linked" },
-                            { "name": "Life Sciences",
-                              "url":  "https://lifesciences.datastations.nl/",
+                            { "name": "Humanities",
+                              "url": "https://ssh.datastations.nl/",
                               "status": "linked" },
-                            #{ "name": "Physical and Technical Sciences",
-                            #  "url":  "https://phys-techsciences.datastations.nl/" }
-                            { "name": "Physical and Technical Sciences",
-                              "url":  "https://data.4tu.nl/",
+                            { "name": "Law and Public Administration",
+                              "url": "https://ssh.datastations.nl/",
                               "status": "linked" },
-                            { "name": "Other", "url":  "",
-                              "status": "unlinked" }]
+                            { "name": "Behavioural and educational sciences",
+                              "url": "https://ssh.datastations.nl/",
+                              "status": "linked" },
+                            { "name": "Social sciences",
+                              "url": "https://ssh.datastations.nl/",
+                              "status": "linked" },
+                            { "name": "Economics and Business Administration",
+                              "url": "https://ssh.datastations.nl/",
+                              "status": "linked" },
+                            { "name": "Interdisciplinary sciences", "url": "",
+                              "status": "unlinked" },
+                            { "name": "Other", "url":  "", "status": "unlinked" }]
 
         for domain in research_domains:
             uri = URIRef(rdf.uuid_to_uri (str(uuid.uuid5 (uuid.NAMESPACE_OID, domain["name"])), "domain"))
