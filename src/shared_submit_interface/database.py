@@ -300,7 +300,6 @@ class SparqlInterface:
             rdf.add (graph, uri, rdf.SSI["url"], domain["url"], XSD.string)
             rdf.add (graph, uri, rdf.SSI["status"], domain["status"], XSD.string)
 
-
         data_types = [{ "name": "Software under version control with Git", "order": 1 },
                       { "name": "netCDF for use with OPeNDAP", "order": 2 },
                       { "name": "Other", "order": 3 }]
