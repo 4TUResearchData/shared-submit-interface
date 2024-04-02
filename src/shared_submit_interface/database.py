@@ -344,15 +344,14 @@ class SparqlInterface:
         if token is None:
             token = secrets.token_hex (64)
 
-        current_time = datetime.strftime (datetime.now(), "%Y-%m-%dT%H:%M:%SZ")
-
+        current_epoch = int(datetime.now().timestamp())
         graph       = Graph()
         link_uri    = rdf.unique_node ("session")
         account_uri = URIRef(rdf.uuid_to_uri (account_uuid, "account"))
 
         graph.add ((link_uri, RDF.type,                rdf.SSI["Session"]))
         graph.add ((link_uri, rdf.SSI["account"],      account_uri))
-        graph.add ((link_uri, rdf.SSI["created_date"], Literal(current_time, datatype=XSD.dateTime)))
+        graph.add ((link_uri, rdf.SSI["created_date"], Literal(current_epoch, datatype=XSD.integer)))
         graph.add ((link_uri, rdf.SSI["name"],         Literal(name, datatype=XSD.string)))
         graph.add ((link_uri, rdf.SSI["token"],        Literal(token, datatype=XSD.string)))
         graph.add ((link_uri, rdf.SSI["editable"],     Literal(editable, datatype=XSD.boolean)))
