@@ -19,7 +19,7 @@ WHERE {
                                    "University of Twente"^^xsd:string,
                                    "Delft University of Technology"^^xsd:string,
                                    "Eindhoven University of Technology"^^xsd:string) ||
-             ?domain_name = "Physical and Technical Sciences"^^xsd:string ||
+             ?domain_name = "Science and technology"^^xsd:string ||
              ?datatype != "Other"^^xsd:string),
             "4tu", "dans") AS ?repository)
   }
