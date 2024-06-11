@@ -409,8 +409,6 @@ def read_configuration_file (config, server, config_file, logger, config_files):
                 config["clear-cache-on-start"] = False
             except TypeError:
                 config["clear-cache-on-start"] = False
-        elif server.db.cache.storage is None:
-            server.db.cache.storage = f"{server.db.storage}/cache"
 
         production_mode = xml_root.find ("production")
         if production_mode is not None:
