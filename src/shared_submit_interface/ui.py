@@ -8,6 +8,7 @@ import sys
 import logging
 import os
 import json
+import importlib.metadata
 
 from defusedxml import ElementTree
 from werkzeug.serving import run_simple
@@ -45,7 +46,8 @@ class MissingConfigurationError(Exception):
 def show_version ():
     """Show the program's version."""
 
-    print("This is djehuty v0.0.1")
+    version = importlib.metadata.version (__package__ or __name__)
+    print(f"This is shared-submit-interface v{version}")
     sys.exit(0)
 
 
