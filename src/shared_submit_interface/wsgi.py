@@ -611,19 +611,7 @@ class WebUserInterfaceServer:
                             self.log.error ("No redirect location found for '%s'", dataset_uuid)
                             return self.error_500 ()
 
-                        set_cookie = response.headers.get("set-cookie")
-                        if set_cookie is None:
-                            self.log.error ("No session cookie found for '%s'", dataset_uuid)
-                            return self.error_500 ()
-
-                        cookie = set_cookie.split(";")[0].split("=")
-                        if len(cookie) != 2:
-                            self.log.error ("Unexpected parsing of cookie.")
-                            return self.error_500 ()
-
-                        repository_redirect = redirect (f"{base_url}{location}", code=302)
-                        repository_redirect.set_cookie (key=cookie[0], value=cookie[1])
-
+                        repository_redirect = redirect (location, code=302)
                         if self.db.update_dataset (account_uuid=account_uuid,
                                                    dataset_uuid=dataset_uuid,
                                                    email=dataset["account_email"],
