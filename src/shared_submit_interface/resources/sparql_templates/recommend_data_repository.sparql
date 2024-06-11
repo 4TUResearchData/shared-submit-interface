@@ -1,12 +1,14 @@
 {% extends "prefixes.sparql" %}
 {% block query %}
-SELECT DISTINCT ?repository ?domain_name ?datatype ?affiliation_name
+SELECT DISTINCT ?repository ?domain_name ?domain_url ?datatype ?affiliation_name
 WHERE {
   GRAPH <{{state_graph}}> {
     ?dataset     rdf:type                  ssi:Dataset .
     ?dataset     ssi:account               ?account .
     ?dataset     ssi:affiliation/ssi:name  ?affiliation_name .
-    ?dataset     ssi:domain/ssi:name       ?domain_name .
+    ?dataset     ssi:domain                ?domain .
+    ?domain      ssi:name                  ?domain_name .
+    ?domain      ssi:url                   ?domain_url_tmp .
     ?dataset     ssi:datatype/ssi:name     ?datatype .
 
     {# The logic is:
@@ -22,6 +24,8 @@ WHERE {
              ?domain_name = "Science and technology"^^xsd:string ||
              ?datatype != "Other"^^xsd:string),
             "4tu", "dans") AS ?repository)
+
+    BIND(IF((?repository = "4tu"), "https://data.4tu.nl", ?domain_url_tmp) AS ?domain_url)
   }
 
   FILTER (?dataset = <dataset:{{dataset_uuid}}>)

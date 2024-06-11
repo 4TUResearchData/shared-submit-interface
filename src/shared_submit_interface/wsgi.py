@@ -575,8 +575,8 @@ class WebUserInterfaceServer:
                                        "Please provide the type of your data.",
                                        "NeedMoreData")
 
-            repository = self.db.recommend_data_repository (account_uuid = account_uuid,
-                                                            dataset_uuid = dataset_uuid)
+            repository, destination_url = self.db.recommend_data_repository (account_uuid = account_uuid,
+                                                                             dataset_uuid = dataset_uuid)
             if not repository:
                 self.log.error ("No repository recommendation possible for %s", dataset_uuid)
                 self.error_500 ()
@@ -587,6 +587,23 @@ class WebUserInterfaceServer:
                     psk = settings["psk"]
                     base_url = settings["base-url"]
                     endpoint = settings["endpoint"]
+
+                    if (isinstance (destination_url, str) and
+                        (destination_url.endswith ("datastations.nl/") or
+                         destination_url.endswith("dans.knaw.nl/"))):
+                        if self.db.update_dataset (account_uuid=account_uuid,
+                                                   dataset_uuid=dataset_uuid,
+                                                   email=dataset["account_email"],
+                                                   title=dataset["title"],
+                                                   affiliation=dataset["affiliation_uuid"],
+                                                   description=None,
+                                                   is_editable=False,
+                                                   is_transfered=True,
+                                                   domain=dataset["domain_uuid"],
+                                                   datatype=dataset["datatype_uuid"]):
+                            return redirect (destination_url, 302)
+                        return self.error_500()
+
                     record = {
                         "psk":    psk,
                         "email":  dataset["account_email"],

@@ -289,9 +289,12 @@ class SparqlInterface:
                             { "name": "Economics and Business Administration",
                               "url": "https://ssh.datastations.nl/",
                               "status": "linked" },
-                            { "name": "Interdisciplinary sciences", "url": "",
+                            { "name": "Interdisciplinary sciences",
+                              "url": "https://dans.knaw.nl/",
                               "status": "unlinked" },
-                            { "name": "Other", "url":  "", "status": "unlinked" }]
+                            { "name": "Other",
+                              "url":  "https://dans.knaw.nl/",
+                              "status": "unlinked" }]
 
         for domain in research_domains:
             uri = URIRef(rdf.uuid_to_uri (str(uuid.uuid5 (uuid.NAMESPACE_OID, domain["name"])), "domain"))
@@ -494,8 +497,8 @@ class SparqlInterface:
         })
 
         try:
-            output = self.__run_query (query)[0]["repository"]
-            return output
+            output = self.__run_query (query)[0]
+            return output["repository"], output["domain_url"]
         except (IndexError, KeyError):
             self.log.error ("Failed to gather repository in 'recommend_data_repository'.")
             return None
